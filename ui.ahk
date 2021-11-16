@@ -30,10 +30,10 @@ class UserInterface
         return Utility.GetColor(20,1063) == "0xFF7C00"
     }
 
-    ; literally any UI element in lobby and ingame, just used for checking if we're out of the loading screen, I'm using here my unity bar and dungeon icon
+    ; literally any UI element in lobby and ingame, just used for checking if we're out of the loading screen, I'm using here my unity bar and enter button
     IsOutOfLoadingScreen()
     {
-        return Utility.GetColor(75,1049) == "0x000001" || Utility.GetColor(1567,665) == "0x4063C3"
+        return Utility.GetColor(75,1049) == "0x000001" || Utility.GetColor(1043,1025) == "0x214475"
     }
 
     ; any pixel on the revive skil

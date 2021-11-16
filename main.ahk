@@ -171,12 +171,6 @@ class Aerodrome
         Aerodrome.WaitLoadingScreen()
     }
 
-    FinishRun()
-    {
-        this.runCount += 1
-        return Aerodrome.EnterDungeon()
-    }
-
     CheckRepair()
     {
         ; repair weapon after the defined amount of runs
@@ -190,6 +184,12 @@ class Aerodrome
         log.addLogEntry("$time: exiting dungeon")
 
         while (UserInterface.IsOutOfCombat()) {
+            if (UserInterface.IsReviveVisible()) {
+                Aerodrome.Revive()
+
+                sleep 2*1000
+            }
+
             ; walk a tiny bit so possible confirmation windows (like cd on escape)
             send {w}
             sleep 250
@@ -203,11 +203,22 @@ class Aerodrome
         }
 
         while (!UserInterface.IsInLoadingScreen()) {
+            if (UserInterface.IsReviveVisible()) {
+                log.addLogEntry("$time: died while trying to exit, reviving and trying again")
+                Aerodrome.Revive()
+
+                sleep 2*1000
+
+                return Aerodrome.ExitDungeon()
+            }
+
+
             sleep 25
         }
 
         Aerodrome.WaitLoadingScreen()
-        Aerodrome.FinishRun()
+
+        this.runCount += 1
 
         return Aerodrome.EnterLobby()
     }
