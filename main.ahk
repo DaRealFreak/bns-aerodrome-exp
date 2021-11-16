@@ -64,7 +64,22 @@ class Aerodrome
         }
     }
 
-    ; walk to the eva sword from exit spawn
+    EnterLobby()
+    {
+        log.addLogEntry("$time: moving to dungeon")
+
+        Aerodrome.EnableSpeedHack()
+        while (!UserInterface.IsInLoadingScreen()) {
+            UserInterface.ClickEnterDungeon()
+            sleep 25
+        }
+        Aerodrome.DisableSpeedHack()
+
+        Aerodrome.WaitLoadingScreen()
+
+        return Aerodrome.EnterDungeon()
+    }
+
     EnterDungeon()
     {
         log.addLogEntry("$time: entering dungeon, runs done: " this.runCount)
@@ -132,166 +147,21 @@ class Aerodrome
         }
 
         if (UserInterface.IsReviveVisible()) {
-            while (!UserInterface.IsInLoadingScreen()) {
-                send 4
-                sleep 25
-            }
+            Aerodrome.Revive()
 
-            Aerodrome.WaitLoadingScreen()
-
-            return Aerodrome.ExitFromUnknownCamera()
+            return Aerodrome.ExitDungeon()
         }
-
-        sleep 2*1000
 
         Configuration.ToggleAutoCombat()
 
-        return Aerodrome.FinishFight()
+        return Aerodrome.ExitDungeon()
     }
 
-    FinishFight()
+    Revive()
     {
-        log.addLogEntry("$time: go suicide for exit")
-
         Aerodrome.EnableSpeedHack()
 
-        send {w down}
-        send {Shift}
-        sleep 6*1000 / (Configuration.MovementSpeedhackValue())
-        sleep 50
-
-        send {w up}
-        send {d down}
-        sleep 2*1000 / Configuration.MovementSpeedhackValue()
-        send {w down}
-        send {d up}
-        sleep 50
-
-        sleep 2*1000 / Configuration.MovementSpeedhackValue()
-
-        send {w up}
-        send {a down}
-        sleep 2*1000 / Configuration.MovementSpeedhackValue()
-        send {w down}
-        send {a up}
-        sleep 50
-
-        sleep 2*1000 / Configuration.MovementSpeedhackValue()
-
-        send {w up}
-
-        Aerodrome.DisableSpeedHack()
-
-        ; ToDo: add timeout with escape option
-        start := A_TickCount
-        while (!UserInterface.IsReviveVisible()) {
-            if (A_TickCount > start + 120 * 1000) {
-                return Aerodrome.EscapeDungeon()
-            }
-
-            sleep 250
-        }
-
-        return Aerodrome.ExitFromRevive()
-    }
-
-    EscapeDungeon()
-    {
-        log.addLogEntry("$time: unable to suicide, using escape")
-
-        while (UserInterface.IsOutOfCombat()) {
-            ; walk a tiny bit so possible confirmation windows (like cd on escape)
-            send {w}
-            sleep 250
-
-            send {Esc}
-            sleep 1*1000
-
-            UserInterface.ClickEscape()            
-        }
-
-        while (!UserInterface.IsInLoadingScreen()) {
-            sleep 25
-        }
-
-        Aerodrome.WaitLoadingScreen()
-
-        return Aerodrome.ExitFromUnknownCamera()
-    }
-
-    ExitFromUnknownCamera()
-    {
-        log.addLogEntry("$time: died from dummies, camera angle unknown")
-
-        Aerodrome.EnableSpeedHack()
-
-        ; try to walk out of the dungeon backwards
-        send {s down}
-        start := A_TickCount
-        while (UserInterface.IsOutOfLoadingScreen()) {
-            if (A_TickCount > start + (10 * 1000  / Configuration.MovementSpeedhackValue()) + 3 * 1000) {
-                log.addLogEntry("$time: walking backwards was not successful")
-                break
-            }
-            sleep 25
-        }
-        send {s up}
-
-        ; walking backwards was successful
-        if (!UserInterface.IsOutOfLoadingScreen()) {
-            Aerodrome.DisableSpeedHack()
-            while (!UserInterface.IsInLoadingScreen()) {
-                sleep 25
-            }
-            Aerodrome.WaitLoadingScreen()
-
-            Configuration.ClipShadowPlay()
-            return Aerodrome.FinishRun()
-        }
-
-        ; try to walk out of the dungeon forwards
-        send {w down}
-        start := A_TickCount
-        while (UserInterface.IsOutOfLoadingScreen()) {
-            if (A_TickCount > start + (10 * 1000  / Configuration.MovementSpeedhackValue()) + 3 * 1000) {
-                log.addLogEntry("$time: walking forwards was not successful")
-                break
-            }
-            sleep 25
-        }
-        send {w up}
-
-        ; walking forwards was successful
-        if (!UserInterface.IsOutOfLoadingScreen()) {
-            Aerodrome.DisableSpeedHack()
-            while (!UserInterface.IsInLoadingScreen()) {
-                sleep 25
-            }
-            Aerodrome.WaitLoadingScreen()
-
-            Configuration.ClipShadowPlay()
-            return Aerodrome.FinishRun()
-        }
-
-        Aerodrome.DisableSpeedHack()
-        log.addLogEntry("$time: unable to navigate out of the dungeon, exiting")
-        Configuration.ClipShadowPlay()
-        sleep 50
-        ExitApp
-    }
-
-    FinishRun()
-    {
-        this.runCount += 1
-        return Aerodrome.EnterDungeon()
-    }
-
-    ExitFromRevive()
-    {
-        log.addLogEntry("$time: revive and exit the dungeon")
-
-        Aerodrome.EnableSpeedHack()
-
+        ; ToDo: add timeout
         while (!UserInterface.IsInLoadingScreen()) {
             send 4
             sleep 25
@@ -299,18 +169,12 @@ class Aerodrome
 
         Aerodrome.DisableSpeedHack()
         Aerodrome.WaitLoadingScreen()
+    }
 
-        log.addLogEntry("$time: exiting dungeon")
-
-        send {a down}
-        while (!UserInterface.IsInLoadingScreen()) {
-            sleep 25
-        }
-        send {a up}
-
-        Aerodrome.WaitLoadingScreen()
-
-        return Aerodrome.FinishRun()
+    FinishRun()
+    {
+        this.runCount += 1
+        return Aerodrome.EnterDungeon()
     }
 
     CheckRepair()
@@ -334,6 +198,8 @@ class Aerodrome
             sleep 1*1000
 
             UserInterface.ClickExit()
+            sleep 1*1000
+            send y
         }
 
         while (!UserInterface.IsInLoadingScreen()) {
@@ -341,8 +207,9 @@ class Aerodrome
         }
 
         Aerodrome.WaitLoadingScreen()
+        Aerodrome.FinishRun()
 
-        return Aerodrome.UseExitPortal()
+        return Aerodrome.EnterLobby()
     }
 
     ; repair the weapon

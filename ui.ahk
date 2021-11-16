@@ -8,9 +8,14 @@ If the resolution and ClientConfiguration.xml are not identical you'll always ha
 */
 class UserInterface
 {
-    ClickEscape()
+    ClickExit()
     {
-        MouseClick, left, 1546, 841
+        MouseClick, left, 1770, 870
+    }
+
+    ClickEnterDungeon()
+    {
+        MouseClick, left, 1032, 1034
     }
 
     ; whenever you want to refresh your exp buff food (basically one of the last pixels which will become darker)
@@ -25,10 +30,10 @@ class UserInterface
         return Utility.GetColor(20,1063) == "0xFF7C00"
     }
 
-    ; literally any UI element, just used for checking if we're out of the loading screen, I'm using here my unity bar
+    ; literally any UI element in lobby and ingame, just used for checking if we're out of the loading screen, I'm using here my unity bar and dungeon icon
     IsOutOfLoadingScreen()
     {
-        return Utility.GetColor(75,1049) == "0x000001"
+        return Utility.GetColor(75,1049) == "0x000001" || Utility.GetColor(1567,665) == "0x4063C3"
     }
 
     ; any pixel on the revive skil

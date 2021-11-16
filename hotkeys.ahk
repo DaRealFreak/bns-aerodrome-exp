@@ -38,7 +38,7 @@ Numpad1::
     global log := new LogClass("aerodrome")
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
-    Aerodrome.EscapeDungeon()
+    Aerodrome.EnterLobby()
     return
 
 *NumPadDot::
