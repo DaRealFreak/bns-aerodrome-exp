@@ -69,6 +69,15 @@ class Aerodrome
         log.addLogEntry("$time: moving to dungeon")
 
         Aerodrome.EnableSpeedHack()
+
+        ; sometimes stage selection is out of focus, so we try to set it twice
+        loop, 2 {
+            UserInterface.EditStage()
+            sleep 250
+            Configuration.SetAerodromeStage()
+            sleep 250
+        }
+
         while (!UserInterface.IsInLoadingScreen()) {
             UserInterface.ClickEnterDungeon()
             sleep 25
@@ -183,7 +192,7 @@ class Aerodrome
     {
         log.addLogEntry("$time: exiting dungeon")
 
-        while (UserInterface.IsOutOfCombat()) {
+        while (!UserInterface.IsInF8Lobby()) {
             if (UserInterface.IsReviveVisible()) {
                 Aerodrome.Revive()
 
@@ -201,22 +210,6 @@ class Aerodrome
             sleep 1*1000
             send y
         }
-
-        while (!UserInterface.IsInLoadingScreen()) {
-            if (UserInterface.IsReviveVisible()) {
-                log.addLogEntry("$time: died while trying to exit, reviving and trying again")
-                Aerodrome.Revive()
-
-                sleep 2*1000
-
-                return Aerodrome.ExitDungeon()
-            }
-
-
-            sleep 25
-        }
-
-        Aerodrome.WaitLoadingScreen()
 
         this.runCount += 1
 

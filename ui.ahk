@@ -13,6 +13,16 @@ class UserInterface
         MouseClick, left, 1770, 870
     }
 
+    ; start holding mouse right side of the stage number and release it left of the stage number to edit
+    EditStage()
+    {
+        MouseClick, Left, 1738, 476
+        click down
+        sleep 150
+        MouseMove, 1717, 476
+        click up
+    }
+
     ClickEnterDungeon()
     {
         MouseClick, left, 1032, 1034
@@ -33,7 +43,12 @@ class UserInterface
     ; literally any UI element in lobby and ingame, just used for checking if we're out of the loading screen, I'm using here my unity bar and enter button
     IsOutOfLoadingScreen()
     {
-        return Utility.GetColor(75,1049) == "0x000001" || Utility.GetColor(1043,1025) == "0x214475"
+        return Utility.GetColor(75,1049) == "0x000001" || UserInterface.IsInF8Lobby()
+    }
+
+    IsInF8Lobby()
+    {
+        return Utility.GetColor(1043,1025) == "0x214475"
     }
 
     ; any pixel on the revive skil

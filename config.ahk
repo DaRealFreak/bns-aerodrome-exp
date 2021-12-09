@@ -19,9 +19,10 @@ class Configuration
         return true
     }
 
-    UseNoText()
+    ; which stage to farm
+    SetAerodromeStage()
     {
-        return true
+        send 51
     }
 
     ; hotkey where the buff food is placed
