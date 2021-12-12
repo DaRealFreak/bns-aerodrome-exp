@@ -22,7 +22,7 @@ class Configuration
     ; which stage to farm
     SetAerodromeStage()
     {
-        send 51
+        send 53
     }
 
     ; hotkey where the buff food is placed
@@ -62,6 +62,16 @@ class Configuration
         send {Numpad3}
     }
 
+    EnableAnimationSpeedhack()
+    {
+        send {Numpad6}
+    }
+
+    DisableAnimationSpeedhack()
+    {
+        send {Numpad3}
+    }
+
     ; configured speed value
     MovementSpeedhackValue()
     {
@@ -74,5 +84,15 @@ class Configuration
         send {alt down}{f10 down}
         sleep 1000
         send {alt up}{f10 up}
+    }
+
+    UseTalisman()
+    {
+        send r
+    }
+
+    UseRevive()
+    {
+        send 4
     }
 }

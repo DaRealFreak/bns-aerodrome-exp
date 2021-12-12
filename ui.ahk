@@ -23,6 +23,18 @@ class UserInterface
         click up
     }
 
+    LeaveParty()
+    {
+        send {AltDown}
+        sleep 150
+        MouseClick, Left, 318, 78
+        sleep 150
+        send {AltUp}
+
+        sleep 500
+        send y
+    }
+
     ClickEnterDungeon()
     {
         MouseClick, left, 1032, 1034
