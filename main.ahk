@@ -10,7 +10,9 @@ SetWinDelay, -1
 
 class Aerodrome
 {
+    static diedInRun := false
     static runCount := 0
+    static runStartTimeStamp := 0
 
     ; function we can call when we expect a loading screen and want to wait until the loading screen is over
     WaitLoadingScreen()
@@ -67,6 +69,9 @@ class Aerodrome
     EnterLobby()
     {
         log.addLogEntry("$time: moving to dungeon")
+
+        this.runStartTimeStamp := A_TickCount
+        this.diedInRun := false
 
         Aerodrome.EnableSpeedHack()
 
@@ -148,19 +153,37 @@ class Aerodrome
         log.addLogEntry("$time: activating auto combat")
 
         Configuration.ToggleAutoCombat()
+        Configuration.EnableAnimationSpeedhack()
 
         sleep 5*1000
 
+        start := A_TickCount
+
         while (!UserInterface.IsOutOfCombat() && !UserInterface.IsReviveVisible()) {
+            if (Utility.GameActive()) {
+                ; use talisman if in the game
+                Configuration.UseTalisman()
+            }
+
+            if (A_TickCount > (start + 6*60*1000)) {
+                ; timeout for autocombat are 6 minutes, probably being stuck somewhere, safety exit over lobby which works even when dead
+                Configuration.DisableAnimationSpeedhack()
+                return Aerodrome.ExitOverLobby()
+            }
+
             sleep 25
         }
 
         if (UserInterface.IsReviveVisible()) {
+            Configuration.DisableAnimationSpeedhack()
+
+            this.diedInRun := true
             Aerodrome.Revive()
 
             return Aerodrome.ExitDungeon()
         }
 
+        Configuration.DisableAnimationSpeedhack()
         Configuration.ToggleAutoCombat()
 
         return Aerodrome.ExitDungeon()
@@ -168,11 +191,18 @@ class Aerodrome
 
     Revive()
     {
+        log.addLogEntry("$time: died, reviving")
+
         Aerodrome.EnableSpeedHack()
 
         ; ToDo: add timeout
         while (!UserInterface.IsInLoadingScreen()) {
-            send 4
+            ; autocombat could revive successfully
+            if (UserInterface.IsOutOfCombat()) {
+                return
+            }
+
+            Configuration.UseRevive()
             sleep 25
         }
 
@@ -188,12 +218,25 @@ class Aerodrome
         }
     }
 
+    ExitOverLobby()
+    {
+        log.addLogEntry("$time: exiting over lobby")
+        while (!UserInterface.IsInLoadingScreen()) {
+            UserInterface.LeaveParty()
+        }
+
+        UserInterface.WaitLoadingScreen()
+
+        return Aerodrome.ExitDungeon()
+    }
+
     ExitDungeon()
     {
         log.addLogEntry("$time: exiting dungeon")
 
         while (!UserInterface.IsInF8Lobby()) {
             if (UserInterface.IsReviveVisible()) {
+                this.diedInRun := true
                 Aerodrome.Revive()
 
                 sleep 2*1000
@@ -211,9 +254,13 @@ class Aerodrome
             send y
         }
 
+        if (!this.diedInRun) {
+            log.addLogEntry("$time: run took " ((A_TickCount - this.runStartTimeStamp) / 1000) " seconds")
+        }
+
         this.runCount += 1
 
-        return Aerodrome.EnterLobby()
+        return true
     }
 
     ; repair the weapon
