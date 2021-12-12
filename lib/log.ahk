@@ -467,6 +467,8 @@ class LogClass
 		{ ; if auto writing, write out the array
 			errLvl := this.savePendingEntriesToLog()
 		}
+		; sleep at least 10 ms to avoid access errors
+		sleep 10
 		return errLvl
 	}
 	
