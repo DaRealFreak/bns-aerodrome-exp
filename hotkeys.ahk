@@ -26,19 +26,12 @@ Numpad0::
     log.addLogEntry("$time: starting aerodrome exp farm")
 
     loop {
-        if (!Aerodrome.EnterDungeon()) {
+        if (!Aerodrome.EnterLobby()) {
             break
         }
         sleep 250
     }
 
-    return
-
-Numpad1::
-    global log := new LogClass("aerodrome")
-    log.initalizeNewLogFile(1)
-    log.addLogEntry("$time: starting aerodrome exp farm")
-    Aerodrome.EnterLobby()
     return
 
 *NumPadDot::
