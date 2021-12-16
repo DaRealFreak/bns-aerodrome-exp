@@ -40,4 +40,9 @@ class Utility
             }
         }
     }
+
+    RoundDecimal(value)
+    {
+        return RegExReplace(value,"(\.\d{2})\d*","$1")
+    }
 }

@@ -12,13 +12,12 @@ class Aerodrome
 {
     static diedInRun := false
     static runCount := 0
+    static successFullRuns := []
     static runStartTimeStamp := 0
 
     ; function we can call when we expect a loading screen and want to wait until the loading screen is over
     WaitLoadingScreen()
     {
-        log.addLogEntry("$time: wait for loading screen")
-
         ; just sleep while we're in the loading screen
         while (UserInterface.IsInLoadingScreen()) {
             sleep 5
@@ -96,7 +95,7 @@ class Aerodrome
 
     EnterDungeon()
     {
-        log.addLogEntry("$time: entering dungeon, runs done: " this.runCount)
+        log.addLogEntry("$time: entering dungeon")
 
         send {w down}
         send {Shift}
@@ -134,13 +133,12 @@ class Aerodrome
 
         send {w down}
         send {Shift}
-        sleep 6*1000 / (Configuration.MovementSpeedhackValue())
-        send {w up}
-        sleep 50
+        sleep 4*1000 / (Configuration.MovementSpeedhackValue())
 
         send {a down}
-        sleep 6*1000 / Configuration.MovementSpeedhackValue()
+        sleep 5.5*1000 / Configuration.MovementSpeedhackValue()
         send {a up}
+        send {w up}
         sleep 50
 
         Aerodrome.DisableSpeedHack()
@@ -222,6 +220,11 @@ class Aerodrome
     {
         log.addLogEntry("$time: exiting over lobby")
         while (!UserInterface.IsInLoadingScreen()) {
+            if (!Utility.GameActive()) {
+                log.addLogEntry("$time: couldn't find game process, exiting")
+                ExitApp
+            }
+
             UserInterface.LeaveParty()
         }
 
@@ -235,6 +238,11 @@ class Aerodrome
         log.addLogEntry("$time: exiting dungeon")
 
         while (!UserInterface.IsInF8Lobby()) {
+            if (!Utility.GameActive()) {
+                log.addLogEntry("$time: couldn't find game process, exiting")
+                ExitApp
+            }
+
             if (UserInterface.IsReviveVisible()) {
                 this.diedInRun := true
                 Aerodrome.Revive()
@@ -255,12 +263,34 @@ class Aerodrome
         }
 
         if (!this.diedInRun) {
-            log.addLogEntry("$time: run took " ((A_TickCount - this.runStartTimeStamp) / 1000) " seconds")
+            log.addLogEntry("$time: run took " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
+            this.successFullRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
+        } else {
+            log.addLogEntry("$time: failed run after " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
         }
 
         this.runCount += 1
 
+        Aerodrome.LogStatistics()
+
         return true
+    }
+
+    LogStatistics()
+    {
+        failedRuns := this.runCount - this.successFullRuns.Length()
+        successRate := (failedRuns / this.runCount) * 100
+
+        averageRunTime := 0
+        for _, v in this.successFullRuns
+            averageRunTime += v
+        averageRunTime /= this.successFullRuns.Length()
+
+        if (!averageRunTime) {
+            averageRunTime := 0
+        }
+
+        log.addLogEntry("$time: runs done: " this.runCount " (died in " (failedRuns) " out of " this.runCount " runs (" Utility.RoundDecimal(successRate) "%), average run time: " Utility.RoundDecimal(averageRunTime) " seconds)")
     }
 
     ; repair the weapon
