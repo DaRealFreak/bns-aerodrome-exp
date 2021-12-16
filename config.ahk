@@ -40,7 +40,7 @@ class Configuration
     ; after how many runs should we repair our weapon
     UseRepairToolsAfterRunCount()
     {
-        return 7
+        return 6
     }
 
     ToggleAutoCombat()
