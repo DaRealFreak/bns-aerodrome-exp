@@ -25,6 +25,12 @@ class Configuration
         send 53
     }
 
+    ; in my test run on the selected stage I got 2.08m exp in one run
+    ExpectedExpPerRun()
+    {
+        return 2 080 000
+    }
+
     ; hotkey where the buff food is placed
     UseBuffFood()
     {

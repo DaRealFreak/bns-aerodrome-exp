@@ -10,9 +10,12 @@ SetWinDelay, -1
 
 class Aerodrome
 {
-    static diedInRun := false
     static runCount := 0
+
     static successFullRuns := []
+    static failedRuns := []
+
+    static diedInRun := false
     static runStartTimeStamp := 0
 
     ; function we can call when we expect a loading screen and want to wait until the loading screen is over
@@ -267,6 +270,7 @@ class Aerodrome
             this.successFullRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
         } else {
             log.addLogEntry("$time: failed run after " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
+            this.failedRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
         }
 
         this.runCount += 1
@@ -278,19 +282,36 @@ class Aerodrome
 
     LogStatistics()
     {
-        failedRuns := this.runCount - this.successFullRuns.Length()
-        successRate := (failedRuns / this.runCount) * 100
+        failedRuns := this.failedRuns.Length()
+        failedRate := (failedRuns / this.runCount)
+        successRate := 1.0 - failedRate
 
         averageRunTime := 0
-        for _, v in this.successFullRuns
+        for _, v in this.successFullRuns {
             averageRunTime += v
+        }
         averageRunTime /= this.successFullRuns.Length()
 
         if (!averageRunTime) {
             averageRunTime := 0
         }
 
-        log.addLogEntry("$time: runs done: " this.runCount " (died in " (failedRuns) " out of " this.runCount " runs (" Utility.RoundDecimal(successRate) "%), average run time: " Utility.RoundDecimal(averageRunTime) " seconds)")
+        averageFailRunTime := 0
+        for _, v in this.failedRuns {
+            averageFailRunTime += v
+        }
+        averageFailRunTime /= this.failedRuns.Length()
+
+        if (!averageFailRunTime) {
+            averageFailRunTime := 0
+        }
+
+        averageRunsHour := 3600 / (averageRunTime * successRate + averageFailRunTime * failedRate)
+        expectedSuccessFullRunsPerHour := averageRunsHour * successRate
+        expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessFullRunsPerHour
+
+        log.addLogEntry("$time: runs done: " this.runCount " (died in " (failedRuns) " out of " this.runCount " runs (" Utility.RoundDecimal(failedRate * 100) "%), average run time: " Utility.RoundDecimal(averageRunTime) " seconds)")
+        log.addLogEntry("$time: expected exp/hr: " Utility.ThousandsSep(Round(expectedExpPerHour, 2)))
     }
 
     ; repair the weapon
