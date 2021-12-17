@@ -12,7 +12,7 @@ class Aerodrome
 {
     static runCount := 0
 
-    static successFullRuns := []
+    static successfulRuns := []
     static failedRuns := []
 
     static diedInRun := false
@@ -140,7 +140,7 @@ class Aerodrome
         sleep 4*1000 / (Configuration.MovementSpeedhackValue())
 
         send {a down}
-        sleep 5.5*1000 / Configuration.MovementSpeedhackValue()
+        sleep 5*1000 / Configuration.MovementSpeedhackValue()
         send {a up}
         send {w up}
         sleep 50
@@ -268,7 +268,7 @@ class Aerodrome
 
         if (!this.diedInRun) {
             log.addLogEntry("$time: run took " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
-            this.successFullRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
+            this.successfulRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
         } else {
             log.addLogEntry("$time: failed run after " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
             this.failedRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
@@ -288,10 +288,10 @@ class Aerodrome
         successRate := 1.0 - failedRate
 
         averageRunTime := 0
-        for _, v in this.successFullRuns {
+        for _, v in this.successfulRuns {
             averageRunTime += v
         }
-        averageRunTime /= this.successFullRuns.Length()
+        averageRunTime /= this.successfulRuns.Length()
 
         if (!averageRunTime) {
             averageRunTime := 0
@@ -308,11 +308,11 @@ class Aerodrome
         }
 
         averageRunsHour := 3600 / (averageRunTime * successRate + averageFailRunTime * failedRate)
-        expectedSuccessFullRunsPerHour := averageRunsHour * successRate
-        expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessFullRunsPerHour
+        expectedSuccessfulRunsPerHour := averageRunsHour * successRate
+        expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessfulRunsPerHour
 
         log.addLogEntry("$time: runs done: " this.runCount " (died in " (failedRuns) " out of " this.runCount " runs (" Utility.RoundDecimal(failedRate * 100) "%), average run time: " Utility.RoundDecimal(averageRunTime) " seconds)")
-        log.addLogEntry("$time: expected exp/hr: " Utility.ThousandsSep(Round(expectedExpPerHour, 2)))
+        log.addLogEntry("$time: accumulated exp: " Utility.ThousandsSep(Round(this.successfulRuns.Length() * Configuration.ExpectedExpPerRun(), 2)) ", expected exp/hr: " Utility.ThousandsSep(Round(expectedExpPerHour, 2)))
     }
 
     ; repair the weapon
