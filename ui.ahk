@@ -40,6 +40,11 @@ class UserInterface
         MouseClick, left, 1032, 1034
     }
 
+    IsHpBelowCritical()
+    {
+        return Utility.GetColor(908,794) != "0xE8430F"
+    }
+
     ; whenever you want to refresh your exp buff food (basically one of the last pixels which will become darker)
     IsBuffFoodIconVisible()
     {

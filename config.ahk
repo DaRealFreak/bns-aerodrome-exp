@@ -25,16 +25,26 @@ class Configuration
         return 53
     }
 
+    ; whatever we want to do if health is critical (f.e. hmb/drinking potions)
+    CriticalHpAction()
+    {
+        loop, 15 {
+            send f
+            sleep 5
+        }
+
+        Configuration.UseHealthPotion()
+    }
+
     ; depending on the exp boni you have
     ExpectedExpPerRun()
     {
+        ; 21 dummies * x exp, big dummy gives 0 exp
         config := {}
-        ; 21 dummies x 78,100 exp, big dummy gives 0 exp
-        config.Insert(52, 1 640 103)
-        ; 21 dummies x 91,443 exp
-        config.Insert(53, 1 920 303)
-        config.Insert(54, 2 229 675)
-        config.Insert(55, 2 585 730)
+        config.Insert(52, 21 * 78 100)
+        config.Insert(53, 21 * 91 443)
+        config.Insert(54, 21 * 106 175)
+        config.Insert(55, 21 * 123 130)
 
         selectedStage := Configuration.AerodromeStage()
         if (config[selectedStage] > 0) {
@@ -42,6 +52,11 @@ class Configuration
         } else {
             return 0
         }
+    }
+
+    UseHealthPotion()
+    {
+        send 5
     }
 
     ; hotkey where the buff food is placed

@@ -165,6 +165,12 @@ class Aerodrome
             if (Utility.GameActive()) {
                 ; use talisman if in the game
                 Configuration.UseTalisman()
+
+                if (UserInterface.IsHpBelowCritical()) {
+                    Configuration.CriticalHpAction()
+                }
+
+                sleep 25
             }
 
             if (A_TickCount > (start + 6*60*1000)) {
