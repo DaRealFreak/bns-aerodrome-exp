@@ -20,15 +20,28 @@ class Configuration
     }
 
     ; which stage to farm
-    SetAerodromeStage()
+    AerodromeStage()
     {
-        send 53
+        return 53
     }
 
-    ; in my test run on the selected stage I got 2.08m exp in one run
+    ; depending on the exp boni you have
     ExpectedExpPerRun()
     {
-        return 2 080 000
+        config := {}
+        ; 21 dummies x 78,100 exp, big dummy gives 0 exp
+        config.Insert(52, 1 640 103)
+        ; 21 dummies x 91,443 exp
+        config.Insert(53, 1 920 303)
+        config.Insert(54, 2 229 675)
+        config.Insert(55, 2 585 730)
+
+        selectedStage := Configuration.AerodromeStage()
+        if (config[selectedStage] > 0) {
+            return config[selectedStage]
+        } else {
+            return 0
+        }
     }
 
     ; hotkey where the buff food is placed

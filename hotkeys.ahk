@@ -34,6 +34,10 @@ Numpad0::
 
     return
 
+Numpad1::
+    MsgBox % (Configuration.ExpectedExpPerRun())
+    return
+
 *NumPadDot::
     Utility.ReleaseAllKeys()
     Reload

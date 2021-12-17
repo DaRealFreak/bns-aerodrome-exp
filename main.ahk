@@ -78,10 +78,11 @@ class Aerodrome
         Aerodrome.EnableSpeedHack()
 
         ; sometimes stage selection is out of focus, so we try to set it twice
+        stage := Configuration.AerodromeStage()
         loop, 2 {
             UserInterface.EditStage()
             sleep 250
-            Configuration.SetAerodromeStage()
+            send %stage%
             sleep 250
         }
 
