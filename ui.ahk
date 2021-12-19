@@ -42,7 +42,7 @@ class UserInterface
 
     IsHpBelowCritical()
     {
-        return Utility.GetColor(908,794) != "0xE8430F"
+        return false
     }
 
     ; whenever you want to refresh your exp buff food (basically one of the last pixels which will become darker)
@@ -60,7 +60,7 @@ class UserInterface
     ; literally any UI element in lobby and ingame, just used for checking if we're out of the loading screen, I'm using here my unity bar and enter button
     IsOutOfLoadingScreen()
     {
-        return Utility.GetColor(75,1049) == "0x000001" || UserInterface.IsInF8Lobby()
+        return Utility.GetColor(67,1054) == "0x000001" || UserInterface.IsInF8Lobby()
     }
 
     IsInF8Lobby()
@@ -77,6 +77,7 @@ class UserInterface
     ; sprint bar to check if we're out of combat
     IsOutOfCombat()
     {
-        return Utility.GetColor(809,836) == "0xA5B721"
+		col := Utility.GetColor(809,836)
+        return col == "0xA6B721" || col == "0xA5B721"
     }
 }

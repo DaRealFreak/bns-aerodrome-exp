@@ -179,6 +179,14 @@ class Aerodrome
                 return Aerodrome.ExitOverLobby()
             }
 
+            if (UserInterface.IsInLoadingScreen()) {
+                ; autocombat pressed 4 without ahk noticing
+                this.diedInRun := true
+                Aerodrome.WaitLoadingScreen()
+
+                return Aerodrome.ExitDungeon()
+            }
+
             sleep 25
         }
 

@@ -22,7 +22,7 @@ class Configuration
     ; which stage to farm
     AerodromeStage()
     {
-        return 53
+        return 52
     }
 
     ; whatever we want to do if health is critical (f.e. hmb/drinking potions)
@@ -41,6 +41,7 @@ class Configuration
     {
         ; 21 dummies * x exp, big dummy gives 0 exp
         config := {}
+        config.Insert(51, 21 * 66 705)
         config.Insert(52, 21 * 78 100)
         config.Insert(53, 21 * 91 443)
         config.Insert(54, 21 * 106 175)
