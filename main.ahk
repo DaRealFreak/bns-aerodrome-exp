@@ -191,9 +191,13 @@ class Aerodrome
 
         send {w down}
         send {Shift}
-        sleep 12*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 13*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
         sleep 50
+
+        send {s down}
+        sleep 1.5*1000 / (Configuration.MovementSpeedhackValue())
+        send {s up}
 
         send {a down}
         sleep 11*1000 / Configuration.MovementSpeedhackValue()
@@ -202,7 +206,7 @@ class Aerodrome
 
         send {w down}
         send {Shift}
-        sleep 4.5*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 3.5*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
         sleep 50
 
