@@ -131,6 +131,9 @@ class Aerodrome
 
             Aerodrome.DisableSpeedHack()
         } else {
+            ; receiver clears previous states to prevent desyncs
+            Sync.ClearStates()
+
             while (UserInterface.IsLfpButtonVisible()) {
                 ; click somewhere so we're not in the chatbox anymore
                 UserInterface.ClickReady()
