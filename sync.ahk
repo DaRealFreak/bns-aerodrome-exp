@@ -12,10 +12,15 @@ class Sync
         FileCreateDir, %dir%
     }
 
-    WaitForState(state)
+    WaitForState(state, timeout=0)
     {
         tmpFile := A_ScriptDir "\sync\" state
+        timeoutTimestamp := A_TickCount + timeout
+
         while (!FileExist(tmpFile)) {
+            if (timeout > 0 && A_TickCount >= timeoutTimestamp) {
+                return
+            }
             sleep 25
         }
 
