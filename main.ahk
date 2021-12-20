@@ -117,18 +117,18 @@ class Aerodrome
 
             Aerodrome.EnableSpeedHack()
 
-            ; sometimes stage selection is out of focus, so we try to set it twice
-            stage := Configuration.AerodromeStage()
-            loop, 2 {
-                UserInterface.EditStage()
-                sleep 250
-                send %stage%
-                sleep 250
-            }
-
             while (!UserInterface.IsInLoadingScreen()) {
+                ; sometimes stage selection is out of focus, so we try to set it twice
+                stage := Configuration.AerodromeStage()
+                loop, 2 {
+                    UserInterface.EditStage()
+                    sleep 250
+                    send %stage%
+                    sleep 250
+                }
+
                 UserInterface.ClickEnterDungeon()
-                sleep 25
+                sleep 3*1000
             }
 
             Aerodrome.DisableSpeedHack()
@@ -251,6 +251,12 @@ class Aerodrome
 
         ; get into combat for reliable pulling of mobs
         while (!UserInterface.IsBlockOnCooldown()) {
+            if (UserInterface.IsReviveVisible()) {
+                Sync.SetState("exit_dungeon")
+
+                return Aerodrome.ExitDungeon()
+            }
+
             Configuration.UseBlockSkill()
             sleep 5
         }
@@ -294,6 +300,12 @@ class Aerodrome
         }
 
         while (!UserInterface.IsSsAvailable()) {
+            if (UserInterface.IsReviveVisible()) {
+                Sync.SetState("exit_dungeon")
+
+                return Aerodrome.ExitDungeon()
+            }
+
             Configuration.DefaultSpam()
         }
 
@@ -321,8 +333,8 @@ class Aerodrome
         while (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
             Configuration.DpsSpam()
 
-            ; break combat after 20 seconds with superjump to escape to lobby faster
-            if (A_TickCount > start + 20*1000) {
+            ; break combat after 25 seconds with superjump to escape to lobby faster
+            if (A_TickCount > start + 25*1000) {
                 while (UserInterface.IsSuperJumpAvailable()) {
                     Configuration.UseSuperJumpSkill()
                     sleep 5
@@ -446,13 +458,6 @@ class Aerodrome
             if (!Utility.GameActive()) {
                 log.addLogEntry("$time: couldn't find game process, exiting")
                 ExitApp
-            }
-
-            if (UserInterface.IsReviveVisible()) {
-                this.diedInRun := true
-                Aerodrome.Revive()
-
-                sleep 2*1000
             }
 
             ; walk a tiny bit so possible confirmation windows (like cd on escape)
