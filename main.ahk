@@ -337,8 +337,8 @@ class Aerodrome
         while (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
             Configuration.DpsSpam()
 
-            ; break combat after 25 seconds with superjump to escape to lobby faster
-            if (A_TickCount > start + 25*1000) {
+            ; break combat after 20 seconds with superjump to escape to lobby faster
+            if (A_TickCount > start + 20*1000) {
                 while (UserInterface.IsSuperJumpAvailable()) {
                     Configuration.UseSuperJumpSkill()
                     sleep 5
@@ -393,17 +393,17 @@ class Aerodrome
             sleep 25
         }
 
+        Configuration.ToggleAutoCombat()
+
         if (UserInterface.IsReviveVisible()) {
             Configuration.DisableAnimationSpeedhack()
 
             this.diedInRun := true
-            Aerodrome.Revive()
 
             return Aerodrome.ExitDungeon()
         }
 
         Configuration.DisableAnimationSpeedhack()
-        Configuration.ToggleAutoCombat()
 
         return Aerodrome.ExitDungeon()
     }
