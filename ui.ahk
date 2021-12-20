@@ -35,9 +35,44 @@ class UserInterface
         send y
     }
 
+    ClickReady()
+    {
+        MouseClick, left, 962, 1035
+    }
+
+    ClickChat()
+    {
+        MouseClick, left, 158, 887
+    }
+
     ClickEnterDungeon()
     {
         MouseClick, left, 1032, 1034
+    }
+
+    IsDuoReady()
+    {
+        return Utility.GetColor(984,120) == "0x38D454"
+    }
+
+    IsLfpButtonVisible()
+    {
+        return Utility.GetColor(860,1040) == "0x214475"
+    }
+
+    IsSuperJumpAvailable()
+    {
+        return Utility.GetColor(1277,888) == "0xBCB9B1"
+    }
+
+    IsBlockOnCooldown()
+    {
+        return Utility.GetColor(892,887) == "0x611B1C"
+    }
+
+    IsSsAvailable()
+    {
+        return Utility.GetColor(695,951) == "0xD8A4B3"
     }
 
     IsHpBelowCritical()

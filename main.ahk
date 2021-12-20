@@ -4,12 +4,20 @@ SetWinDelay, -1
 #Include %A_ScriptDir%\lib\utility.ahk
 #Include %A_ScriptDir%\lib\log.ahk
 
+#Include %A_ScriptDir%\camera.ahk
 #Include %A_ScriptDir%\config.ahk
 #Include %A_ScriptDir%\ui.ahk
+#Include %A_ScriptDir%\sync.ahk
 #Include %A_ScriptDir%\hotkeys.ahk
+
+RmbLmbSpam:
+    Configuration.DefaultSpam()
+	return
 
 class Aerodrome
 {
+    static receiver := false
+    static solo := false
     static runCount := 0
 
     static successfulRuns := []
@@ -37,7 +45,15 @@ class Aerodrome
     EnableSpeedHack()
     {
         loop, 5 {
-            Configuration.EnableMovementSpeedhack()
+            Configuration.EnableLobbySpeedhack()
+            sleep 25
+        }
+    }
+
+    EnableAnimationSpeedHack()
+    {
+        loop, 5 {
+            Configuration.EnableAnimationSpeedHack()
             sleep 25
         }
     }
@@ -45,7 +61,15 @@ class Aerodrome
     DisableSpeedHack()
     {
         loop, 5 {
-            Configuration.DisableMovementSpeedhack()
+            Configuration.DisableLobbySpeedhack()
+            sleep 25
+        }
+    }
+
+    DisableAnimationSpeedHack()
+    {
+        loop, 5 {
+            Configuration.DisableAnimationSpeedhack()
             sleep 25
         }
     }
@@ -68,29 +92,58 @@ class Aerodrome
         }
     }
 
-    EnterLobby()
+    EnterLobby(receiver, solo = false)
     {
+        ; clear leftover states before each run
+        Sync.ClearStates()
+
+        this.receiver := receiver
+        this.solo := solo
+
         log.addLogEntry("$time: moving to dungeon")
 
         this.runStartTimeStamp := A_TickCount
         this.diedInRun := false
 
-        Aerodrome.EnableSpeedHack()
+        if (!this.receiver || this.solo) {
+            if (!this.solo) {
+                while (!UserInterface.IsDuoReady()) {
+                    UserInterface.ClickChat()
+                    Configuration.InviteDuo()
+                    send {Enter}
+                    sleep 3*1000
+                }
+            }
 
-        ; sometimes stage selection is out of focus, so we try to set it twice
-        stage := Configuration.AerodromeStage()
-        loop, 2 {
-            UserInterface.EditStage()
-            sleep 250
-            send %stage%
-            sleep 250
-        }
+            Aerodrome.EnableSpeedHack()
 
-        while (!UserInterface.IsInLoadingScreen()) {
-            UserInterface.ClickEnterDungeon()
-            sleep 25
+            ; sometimes stage selection is out of focus, so we try to set it twice
+            stage := Configuration.AerodromeStage()
+            loop, 2 {
+                UserInterface.EditStage()
+                sleep 250
+                send %stage%
+                sleep 250
+            }
+
+            while (!UserInterface.IsInLoadingScreen()) {
+                UserInterface.ClickEnterDungeon()
+                sleep 25
+            }
+
+            Aerodrome.DisableSpeedHack()
+        } else {
+            while (UserInterface.IsLfpButtonVisible()) {
+                ; accept invites
+                send y
+            }
+
+            ; click ready
+            UserInterface.ClickReady()
+            sleep 1*1000
+
+            Sync.SetState("in_lobby")
         }
-        Aerodrome.DisableSpeedHack()
 
         Aerodrome.WaitLoadingScreen()
 
@@ -115,14 +168,26 @@ class Aerodrome
 
     MoveToDummies()
     {
+        if (!this.receiver || this.solo) {
+            Aerodrome.CheckRepair()
+        }
+
 		sleep 1.5*1000
 
-        Aerodrome.CheckRepair()
         Aerodrome.CheckBuffFood()
+
+        if (this.receiver && !this.solo) {
+            Sync.WaitForState("dummyroom")
+        }
+
+        if (!this.receiver && !this.solo) {
+            ; loading screeens on laptop take forever-.-
+            sleep 7*1000
+        }
 
         log.addLogEntry("$time: moving to the dummy room")
 
-        Aerodrome.EnableSpeedHack()
+        Aerodrome.EnableAnimationSpeedHack()
 
         send {w down}
         send {Shift}
@@ -137,17 +202,139 @@ class Aerodrome
 
         send {w down}
         send {Shift}
-        sleep 4*1000 / (Configuration.MovementSpeedhackValue())
-
-        send {a down}
-        sleep 5*1000 / Configuration.MovementSpeedhackValue()
-        send {a up}
+        sleep 4.5*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
         sleep 50
 
-        Aerodrome.DisableSpeedHack()
+        if (this.solo) {
+            ; walk into the corner
+            send {w down}
+            send {a down}
+            send {Shift}
+            sleep 4*1000 / Configuration.MovementSpeedhackValue()
+            send {a up}
+            send {w up}
+            sleep 50
 
-        return Aerodrome.StartAutoCombat()
+            return Aerodrome.StartAutoCombat()
+        }
+
+        if (!this.receiver) {
+            ; slave reached dummy room, tell receiver to start moving to dummy room
+            Sync.SetState("dummyroom")
+        }
+
+        if (this.receiver) {
+            ; continue running for a while to get rid of mobs
+            send {w down}
+            send {Shift}
+            sleep 7*1000 / (Configuration.MovementSpeedhackValue())
+            send {w up}
+            sleep 50
+
+            Sync.WaitForState("exit_dungeon")
+
+            while (UserInterface.IsSuperJumpAvailable()) {
+                Configuration.UseSuperJumpSkill()
+                sleep 5
+            }
+
+            return Aerodrome.ExitDungeon()
+        }
+
+        return Aerodrome.PullDummies()
+    }
+
+    PullDummies()
+    {
+        Sync.SetState("dummyroom")
+
+        ; get into combat for reliable pulling of mobs
+        while (!UserInterface.IsBlockOnCooldown()) {
+            Configuration.UseBlockSkill()
+            sleep 5
+        }
+
+        Settimer, RmbLmbSpam, 25
+
+        send {a down}
+        sleep 4*1000 / (Configuration.MovementSpeedhackValue())
+        send {a up}
+
+        send {w down}
+        sleep 4*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
+
+        ; spin camera by 90° to the right
+        Camera.Spin(90)
+
+        send {a down}
+        sleep 4*1000 / (Configuration.MovementSpeedhackValue())
+        send {a up}
+
+        send {w down}
+        sleep 3.5*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
+
+        ; spin camera by 90° to the right
+        Camera.Spin(90)
+
+        send {w down}
+        sleep 5*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
+
+        ; pull aggro of last dummy group
+        sleep 0.5*1000
+
+        Settimer, RmbLmbSpam, Off
+
+        while (UserInterface.IsSsAvailable()) {
+            send ss
+            sleep 5
+        }
+
+        while (!UserInterface.IsSsAvailable()) {
+            Configuration.DefaultSpam()
+        }
+
+        start := A_TickCount
+        while (A_TickCount < start + 1.1*1000) {
+            Configuration.DefaultSpam()
+        }
+
+        send {d down}
+        sleep 0.75*1000 / (Configuration.MovementSpeedhackValue())
+        send {d up}
+
+        while (UserInterface.IsSsAvailable()) {
+            send ss
+            sleep 5
+        }
+
+        ; turn camera 4° to the left since we walked a bit to the right
+        Camera.Spin(-4)
+
+        sleep 600
+
+        usedTd := false
+        start := A_TickCount
+        while (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
+            Configuration.DpsSpam()
+
+            ; break combat after 20 seconds with superjump to escape to lobby faster
+            if (A_TickCount > start + 20*1000) {
+                while (UserInterface.IsSuperJumpAvailable()) {
+                    Configuration.UseSuperJumpSkill()
+                    sleep 5
+                }
+
+                break
+            }
+        }
+
+        Sync.SetState("exit_dungeon")
+
+        return Aerodrome.ExitDungeon()
     }
 
     StartAutoCombat()
@@ -324,9 +511,16 @@ class Aerodrome
         averageRunsHour := 3600 / (averageRunTime * successRate + averageFailRunTime * failedRate)
         expectedSuccessfulRunsPerHour := averageRunsHour * successRate
         expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessfulRunsPerHour
+        accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun()
+
+        if (!this.solo) {
+            ; if we're running in solo exp is reduced to 60%
+            expectedExpPerHour := expectedExpPerHour * 0.6
+            accumulatedExp := accumulatedExp * 0.6
+        }
 
         log.addLogEntry("$time: runs done: " this.runCount " (died in " (failedRuns) " out of " this.runCount " runs (" Utility.RoundDecimal(failedRate * 100) "%), average run time: " Utility.RoundDecimal(averageRunTime) " seconds)")
-        log.addLogEntry("$time: accumulated exp: " Utility.ThousandsSep(Round(this.successfulRuns.Length() * Configuration.ExpectedExpPerRun(), 2)) ", expected exp/hr: " Utility.ThousandsSep(Round(expectedExpPerHour, 2)))
+        log.addLogEntry("$time: accumulated exp: " Utility.ThousandsSep(Round(accumulatedExp, 2)) ", expected exp/hr: " Utility.ThousandsSep(Round(expectedExpPerHour, 2)))
     }
 
     ; repair the weapon

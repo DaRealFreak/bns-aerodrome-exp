@@ -26,7 +26,7 @@ Numpad0::
     log.addLogEntry("$time: starting aerodrome exp farm")
 
     loop {
-        if (!Aerodrome.EnterLobby()) {
+        if (!Aerodrome.EnterLobby(false)) {
             break
         }
         sleep 250
@@ -35,7 +35,31 @@ Numpad0::
     return
 
 Numpad1::
-    MsgBox % (Configuration.ExpectedExpPerRun())
+    global log := new LogClass("aerodrome_leech")
+    log.initalizeNewLogFile(1)
+    log.addLogEntry("$time: starting aerodrome exp farm")
+
+    loop {
+        if (!Aerodrome.EnterLobby(true)) {
+            break
+        }
+        sleep 250
+    }
+
+    return
+
+Numpad2::
+    global log := new LogClass("aerodrome")
+    log.initalizeNewLogFile(1)
+    log.addLogEntry("$time: starting aerodrome exp farm")
+
+    loop {
+        if (!Aerodrome.EnterLobby(true, true)) {
+            break
+        }
+        sleep 250
+    }
+
     return
 
 *NumPadDot::

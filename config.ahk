@@ -22,7 +22,7 @@ class Configuration
     ; which stage to farm
     AerodromeStage()
     {
-        return 52
+        return 59
     }
 
     ; whatever we want to do if health is critical (f.e. hmb/drinking potions)
@@ -46,6 +46,12 @@ class Configuration
         config.Insert(53, 21 * 91 443)
         config.Insert(54, 21 * 106 175)
         config.Insert(55, 21 * 123 130)
+        config.Insert(56, 21 * 141 474)
+        config.Insert(57, 21 * 155 930)
+        config.Insert(58, 21 * 165 102)
+        config.Insert(59, 21 * 175 108)
+        config.Insert(60, 21 * 184 835)
+        config.Insert(61, 21 * 194 286)
 
         selectedStage := Configuration.AerodromeStage()
         if (config[selectedStage] > 0) {
@@ -75,7 +81,7 @@ class Configuration
     ; after how many runs should we repair our weapon
     UseRepairToolsAfterRunCount()
     {
-        return 6
+        return 5
     }
 
     ToggleAutoCombat()
@@ -85,14 +91,14 @@ class Configuration
         send {ShiftUp}{f4 up}
     }
 
-    ; enable movement speed hack (sanic or normal ce speedhack)
-    EnableMovementSpeedhack()
+    ; enable speed hack (sanic or normal ce speedhack)
+    EnableLobbySpeedhack()
     {
         send {Numpad7}
     }
 
     ; disable movement speed hack (sanic or normal ce speedhack)
-    DisableMovementSpeedhack()
+    DisableLobbySpeedhack()
     {
         send {Numpad3}
     }
@@ -110,7 +116,7 @@ class Configuration
     ; configured speed value
     MovementSpeedhackValue()
     {
-        return 5.0
+        return 5.5
     }
 
     ; shortcut for shadowplay clip in case we want to debug how we got stuck or got to this point
@@ -129,5 +135,59 @@ class Configuration
     UseRevive()
     {
         send 4
+    }
+
+    UseBlockSkill()
+    {
+        send 1
+    }
+
+    UseSuperJumpSkill()
+    {
+        send g
+    }
+
+    DefaultSpam()
+    {
+        send r
+        sleep 5
+        send t
+        sleep 5
+        send f
+        sleep 5
+    }
+
+    DpsSpam()
+    {
+        ; no fucking clue
+        send 2
+        sleep 5
+
+        ; bracelet
+        send 3
+        sleep 5
+
+        ; stance enter and 4
+        if (!UserInterface.IsReviveVisible()) {
+            send 4
+            sleep 5
+        }
+
+        ; warding strike
+        send c
+        sleep 5
+
+        ; iframe bubble
+        send y
+        sleep 5
+
+        ; talisman
+        send z
+        sleep 5
+    }
+
+    InviteDuo()
+    {
+        send /invite "Lunar Tempest"
     }
 }
