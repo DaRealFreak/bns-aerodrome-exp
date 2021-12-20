@@ -107,6 +107,7 @@ class Aerodrome
 
         if (!this.receiver || this.solo) {
             if (!this.solo) {
+                ; disabled for WL test
                 while (!UserInterface.IsDuoReady()) {
                     UserInterface.ClickChat()
                     Configuration.InviteDuo()
@@ -134,6 +135,8 @@ class Aerodrome
             Aerodrome.DisableSpeedHack()
         } else {
             while (UserInterface.IsLfpButtonVisible()) {
+                ; click somewhere so we're not in the chatbox anymore
+                UserInterface.ClickReady()
                 ; accept invites
                 send y
             }
@@ -182,7 +185,8 @@ class Aerodrome
 
         if (!this.receiver && !this.solo) {
             ; loading screeens on laptop take forever-.-
-            sleep 7*1000
+            ; disabled for WL test
+            sleep 3.5*1000
         }
 
         log.addLogEntry("$time: moving to the dummy room")
@@ -206,7 +210,11 @@ class Aerodrome
 
         send {w down}
         send {Shift}
+        ; sleep 3.5 seconds for solo action or 4.5 seconds for wl carry run
         sleep 3.5*1000 / (Configuration.MovementSpeedhackValue())
+        if (!this.solo) {
+            sleep 1*1000 / (Configuration.MovementSpeedhackValue())
+        }
         send {w up}
         sleep 50
 
@@ -234,14 +242,14 @@ class Aerodrome
             send {Shift}
             sleep 7*1000 / (Configuration.MovementSpeedhackValue())
             send {w up}
-            sleep 50
-
-            Sync.WaitForState("exit_dungeon")
+            sleep 250
 
             while (UserInterface.IsSuperJumpAvailable()) {
                 Configuration.UseSuperJumpSkill()
                 sleep 5
             }
+
+            Sync.WaitForState("exit_dungeon", 90*1000)
 
             return Aerodrome.ExitDungeon()
         }
@@ -294,7 +302,11 @@ class Aerodrome
         send {w up}
 
         ; pull aggro of last dummy group
-        sleep 0.5*1000
+        sleep 0.3*1000
+
+        send {s down}
+        sleep 1*1000 / (Configuration.MovementSpeedhackValue())
+        send {s up}
 
         Settimer, RmbLmbSpam, Off
 
@@ -319,7 +331,7 @@ class Aerodrome
         }
 
         send {d down}
-        sleep 0.75*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 1.7*1000 / (Configuration.MovementSpeedhackValue())
         send {d up}
 
         while (UserInterface.IsSsAvailable()) {
@@ -327,10 +339,20 @@ class Aerodrome
             sleep 5
         }
 
-        ; turn camera 4° to the left since we walked a bit to the right
-        Camera.Spin(-4)
+        ; turn camera 17° to the left since we walked a bit to the right
+        Camera.Spin(-17)
 
-        sleep 600
+        start := A_TickCount
+        while (start + 1*1000 >= A_TickCount) {
+            ; trigger iframe while we wait
+            send z
+            sleep 25
+        }
+
+        ; walk tiny bit closer to hit the last bronze dummy
+        send {w down}
+        sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
 
         usedTd := false
         start := A_TickCount
