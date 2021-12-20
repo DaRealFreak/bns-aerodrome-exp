@@ -94,9 +94,6 @@ class Aerodrome
 
     EnterLobby(receiver, solo = false)
     {
-        ; clear leftover states before each run
-        Sync.ClearStates()
-
         this.receiver := receiver
         this.solo := solo
 

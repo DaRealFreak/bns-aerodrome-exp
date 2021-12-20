@@ -5,16 +5,32 @@ SetWorkingDir, %A_ScriptDir%
 ; very easy sync system over empty files
 class Sync
 {
+    static mountedNetworkDrive := false
+
+    MountNetworkDrive()
+    {
+        RunWait %comspec% /c "net use y: \\fritz.box\FRITZ.NAS /user:domain\nas fisch123!",,Hide
+        this.mountedNetworkDrive := true
+    }
+
     ClearStates()
     {
-        dir := A_ScriptDir "\sync\"
+        if (!this.mountedNetworkDrive) {
+            Sync.MountNetworkDrive()
+        }
+
+        dir := "y:\BnS\sync\"
         FileRemoveDir, %dir%, 1
         FileCreateDir, %dir%
     }
 
     WaitForState(state, timeout=0)
     {
-        tmpFile := A_ScriptDir "\sync\" state
+        if (!this.mountedNetworkDrive) {
+            Sync.MountNetworkDrive()
+        }
+
+        tmpFile := "y:\BnS\sync\" state
         timeoutTimestamp := A_TickCount + timeout
 
         while (!FileExist(tmpFile)) {
@@ -24,22 +40,33 @@ class Sync
             sleep 25
         }
 
+        ; sleep to allow other process to close file first
+        sleep 500
+
         DllCall("SetLastError", "UInt", 0)
         FileDelete, %tmpFile%
 
         if (A_LastError != 0) {
-            MsgBox % "couldn't remove file" . A_LastError
+            log.addLogEntry("$time: couldn't remove sync state file")
         }
     }
 
     HasState(state)
     {
-        tmpFile := A_ScriptDir "\sync\" state
+        if (!this.mountedNetworkDrive) {
+            Sync.MountNetworkDrive()
+        }
+
+        tmpFile := "y:\BnS\sync\" state
         return FileExist(tmpFile)
     }
 
     SetState(state) {
-        tmpFile := A_ScriptDir "\sync\" state
+        if (!this.mountedNetworkDrive) {
+            Sync.MountNetworkDrive()
+        }
+
+        tmpFile := "y:\BnS\sync\" state
         FileAppend, "state set", %tmpFile%
 
         return true

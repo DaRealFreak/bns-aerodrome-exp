@@ -25,6 +25,9 @@ Numpad0::
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
 
+    ; clear leftover states before starting
+    Sync.ClearStates()
+
     loop {
         if (!Aerodrome.EnterLobby(false)) {
             break
@@ -39,6 +42,9 @@ Numpad1::
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
 
+    ; clear leftover states before starting
+    Sync.ClearStates()
+
     loop {
         if (!Aerodrome.EnterLobby(true)) {
             break
@@ -52,6 +58,9 @@ Numpad2::
     global log := new LogClass("aerodrome")
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
+
+    ; clear leftover states before starting
+    Sync.ClearStates()
 
     loop {
         if (!Aerodrome.EnterLobby(true, true)) {
