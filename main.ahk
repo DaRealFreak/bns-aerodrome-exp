@@ -335,6 +335,7 @@ class Aerodrome
 
         while (!UserInterface.IsSsAvailable()) {
             if (UserInterface.IsReviveVisible()) {
+                this.diedInRun := true
                 Sync.SetState("exit_dungeon")
 
                 return Aerodrome.ExitDungeon()
@@ -372,20 +373,25 @@ class Aerodrome
         sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
+        ; turn camera 2° to the right to get the last group of mobs in our ccs
+        Camera.Spin(2)
+
         usedTd := false
         start := A_TickCount
-        while (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
-            Configuration.DpsSpam()
 
-            ; break combat after 20 seconds with superjump to escape to lobby faster
-            if (A_TickCount > start + 20*1000) {
-                while (UserInterface.IsSuperJumpAvailable()) {
-                    Configuration.UseSuperJumpSkill()
-                    sleep 5
-                }
-
-                break
+        ; break combat after 20 seconds since our burst is over
+        while (A_TickCount <= start + 20*1000) {
+            if (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
+                this.diedInRun := true
             }
+
+            Configuration.DpsSpam()
+        }
+
+        ; use superjump to exit to lobby faster
+        while (UserInterface.IsSuperJumpAvailable()) {
+            Configuration.UseSuperJumpSkill()
+            sleep 5
         }
 
         Sync.SetState("exit_dungeon")
