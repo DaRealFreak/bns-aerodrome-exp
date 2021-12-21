@@ -105,11 +105,15 @@ class Aerodrome
         if (!this.receiver || this.solo) {
             if (!this.solo) {
                 ; disabled for WL test
+                lastInvite := 0
                 while (!UserInterface.IsDuoReady()) {
-                    UserInterface.ClickChat()
-                    Configuration.InviteDuo()
-                    send {Enter}
-                    sleep 3*1000
+                    if (lastInvite + 3*1000 > A_TickCount) {
+                        UserInterface.ClickChat()
+                        Configuration.InviteDuo()
+                        send {Enter}
+                        lastInvite := A_TickCount
+                    }
+                    sleep 25
                 }
             }
 
