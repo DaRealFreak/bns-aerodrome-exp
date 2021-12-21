@@ -55,7 +55,7 @@ Numpad1::
     return
 
 Numpad2::
-    global log := new LogClass("aerodrome")
+    global log := new LogClass("aerodrome_solo")
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
 

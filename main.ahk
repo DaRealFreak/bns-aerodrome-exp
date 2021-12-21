@@ -117,7 +117,7 @@ class Aerodrome
 
             while (!UserInterface.IsInLoadingScreen()) {
                 ; sometimes stage selection is out of focus, so we try to set it twice
-                stage := Configuration.AerodromeStage()
+                stage := Configuration.AerodromeStage(this.solo)
                 loop, 2 {
                     UserInterface.EditStage()
                     sleep 250
@@ -186,7 +186,8 @@ class Aerodrome
         if (!this.receiver && !this.solo) {
             ; loading screeens on laptop take forever-.-
             ; disabled for WL test
-            sleep 3.5*1000
+            ; not needed anymore after driver update lol
+            ; sleep 3.5*1000
         }
 
         log.addLogEntry("$time: moving to the dummy room")
@@ -541,8 +542,8 @@ class Aerodrome
 
         averageRunsHour := 3600 / (averageRunTime * successRate + averageFailRunTime * failedRate)
         expectedSuccessfulRunsPerHour := averageRunsHour * successRate
-        expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessfulRunsPerHour
-        accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun()
+        expectedExpPerHour := (Configuration.ExpectedExpPerRun(this.solo)) * expectedSuccessfulRunsPerHour
+        accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun(this.solo)
 
         if (!this.solo) {
             ; if we're running in solo exp is reduced to 60%

@@ -20,9 +20,13 @@ class Configuration
     }
 
     ; which stage to farm
-    AerodromeStage()
+    AerodromeStage(solo)
     {
-        return 59
+        if (solo) {
+            return 52
+        } else {
+            return 59
+        }
     }
 
     ; whatever we want to do if health is critical (f.e. hmb/drinking potions)
@@ -37,7 +41,7 @@ class Configuration
     }
 
     ; depending on the exp boni you have
-    ExpectedExpPerRun()
+    ExpectedExpPerRun(solo)
     {
         ; 21 dummies * x exp, big dummy gives 0 exp
         config := {}
@@ -53,7 +57,7 @@ class Configuration
         config.Insert(60, 21 * 184 835)
         config.Insert(61, 21 * 194 286)
 
-        selectedStage := Configuration.AerodromeStage()
+        selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
             return config[selectedStage]
         } else {
