@@ -115,7 +115,7 @@ class Aerodrome
                 ; disabled for WL test
                 lastInvite := 0
                 while (!UserInterface.IsDuoReady()) {
-                    if (lastInvite + 3*1000 > A_TickCount) {
+                    if (lastInvite + 3*1000 <= A_TickCount) {
                         UserInterface.ClickChat()
                         Configuration.InviteDuo()
                         send {Enter}
