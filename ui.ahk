@@ -77,7 +77,7 @@ class UserInterface
 
     IsHpBelowCritical()
     {
-        return false
+        return Utility.GetColor(1038,795) != "0xE0280C"
     }
 
     ; whenever you want to refresh your exp buff food (basically one of the last pixels which will become darker)

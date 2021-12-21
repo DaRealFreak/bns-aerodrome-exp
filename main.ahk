@@ -92,6 +92,14 @@ class Aerodrome
         }
     }
 
+    ; function we use for checking if we should check potions
+    CheckHealth()
+    {
+        if (UserInterface.IsHpBelowCritical()) {
+            Configuration.UseHealthPotion()
+        }
+    }
+
     EnterLobby(receiver, solo = false)
     {
         this.receiver := receiver
@@ -179,9 +187,14 @@ class Aerodrome
             Aerodrome.CheckRepair()
         }
 
-		sleep 1.5*1000
+		sleep 1*1000
 
         Aerodrome.CheckBuffFood()
+
+        if (!this.receiver || this.solo) {
+            sleep 0.5*1000
+            Aerodrome.CheckHealth()
+        }
 
         if (this.receiver && !this.solo) {
             Sync.WaitForState("dummyroom")
