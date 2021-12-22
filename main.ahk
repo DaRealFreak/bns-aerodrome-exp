@@ -381,8 +381,9 @@ class Aerodrome
 
         ; break combat after 20 seconds since our burst is over
         while (A_TickCount <= start + 20*1000) {
-            if (!UserInterface.IsReviveVisible() && !UserInterface.IsInLoadingScreen()) {
+            if (UserInterface.IsReviveVisible() || UserInterface.IsInLoadingScreen()) {
                 this.diedInRun := true
+                break
             }
 
             Configuration.DpsSpam()
