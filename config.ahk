@@ -23,9 +23,9 @@ class Configuration
     AerodromeStage(solo)
     {
         if (solo) {
-            return 52
+            return 51
         } else {
-            return 59
+            return 62
         }
     }
 

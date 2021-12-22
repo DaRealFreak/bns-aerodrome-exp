@@ -319,19 +319,16 @@ class Aerodrome
         sleep 5*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
-        ; pull aggro of last dummy group
-        sleep 0.3*1000
-
-        send {s down}
-        sleep 1*1000 / (Configuration.MovementSpeedhackValue())
-        send {s up}
-
         Settimer, RmbLmbSpam, Off
 
         while (UserInterface.IsSsAvailable()) {
             send ss
             sleep 5
         }
+
+        send {s down}
+        sleep 2*1000 / (Configuration.MovementSpeedhackValue())
+        send {s up}
 
         while (!UserInterface.IsSsAvailable()) {
             if (UserInterface.IsReviveVisible()) {
@@ -345,7 +342,7 @@ class Aerodrome
         }
 
         start := A_TickCount
-        while (A_TickCount < start + 1.1*1000) {
+        while (A_TickCount < start + 1.25*1000) {
             Configuration.DefaultSpam()
         }
 
@@ -362,7 +359,7 @@ class Aerodrome
         Camera.Spin(-17)
 
         start := A_TickCount
-        while (start + 1*1000 >= A_TickCount) {
+        while (start + 1.3*1000 >= A_TickCount) {
             ; trigger iframe while we wait
             send z
             sleep 25
@@ -373,8 +370,8 @@ class Aerodrome
         sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
-        ; turn camera 2° to the right to get the last group of mobs in our ccs
-        Camera.Spin(2)
+        ; turn camera 3° to the right to get the last group of mobs in our ccs
+        Camera.Spin(3)
 
         usedTd := false
         start := A_TickCount
