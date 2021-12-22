@@ -112,16 +112,18 @@ class Aerodrome
 
         if (!this.receiver || this.solo) {
             if (!this.solo) {
-                ; disabled for WL test
-                lastInvite := 0
-                while (!UserInterface.IsDuoReady()) {
-                    if (lastInvite + 3*1000 <= A_TickCount) {
-                        UserInterface.ClickChat()
-                        Configuration.InviteDuo()
-                        send {Enter}
-                        lastInvite := A_TickCount
+                if (!Configuration.IsWarlockTest()) {
+                    lastInvite := 0
+                    while (!UserInterface.IsDuoReady()) {
+                        if (lastInvite + 3*1000 <= A_TickCount) {
+                            UserInterface.ClickChat()
+                            Configuration.InviteDuo()
+                            send {Enter}
+                            lastInvite := A_TickCount
+                        }
+                        sleep 25
                     }
-                    sleep 25
+
                 }
             }
 
@@ -138,7 +140,15 @@ class Aerodrome
                 }
 
                 UserInterface.ClickEnterDungeon()
-                sleep 3*1000
+                start := A_TickCount
+
+                ; repeat loop every 3 seconds but break as soon as we see the loading screen
+                while (start + 3*1000 >= A_TickCount) {
+                    if (UserInterface.IsInLoadingScreen()) {
+                        break
+                    }
+                    sleep 25
+                }
             }
 
             Aerodrome.DisableSpeedHack()
@@ -198,13 +208,6 @@ class Aerodrome
 
         if (this.receiver && !this.solo) {
             Sync.WaitForState("dummyroom")
-        }
-
-        if (!this.receiver && !this.solo) {
-            ; loading screeens on laptop take forever-.-
-            ; disabled for WL test
-            ; not needed anymore after driver update lol
-            ; sleep 3.5*1000
         }
 
         log.addLogEntry("$time: moving to the dummy room")
@@ -319,6 +322,9 @@ class Aerodrome
         sleep 5*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
+        ; pull aggro of last dummy group
+        sleep 0.2*1000
+
         Settimer, RmbLmbSpam, Off
 
         while (UserInterface.IsSsAvailable()) {
@@ -355,8 +361,8 @@ class Aerodrome
             sleep 5
         }
 
-        ; turn camera 17° to the left since we walked a bit to the right
-        Camera.Spin(-17)
+        ; turn camera 10 to the left since we walked a bit to the right
+        Camera.Spin(-10)
 
         start := A_TickCount
         while (start + 1.3*1000 >= A_TickCount) {
@@ -367,11 +373,13 @@ class Aerodrome
 
         ; walk tiny bit closer to hit the last bronze dummy
         send {w down}
-        sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
+        send {d down}
+        sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
+        send {d up}
         send {w up}
 
-        ; turn camera 3° to the right to get the last group of mobs in our ccs
-        Camera.Spin(3)
+        ; turn camera 15° to the left to get the last group of mobs in our ccs
+        Camera.Spin(-15)
 
         usedTd := false
         start := A_TickCount

@@ -7,6 +7,11 @@ This class is primarily used for specific keys or optional settings like speedha
 */
 class Configuration 
 {
+    IsWarlockTest()
+    {
+        return false
+    }
+
     ; shut down the computer if no bns processes are found anymore (dc or maintenance)
     ShutdownComputerAfterCrash()
     {
@@ -56,6 +61,7 @@ class Configuration
         config.Insert(59, 21 * 175 108)
         config.Insert(60, 21 * 184 835)
         config.Insert(61, 21 * 194 286)
+        config.Insert(62, 22 * 204 013)
 
         selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
