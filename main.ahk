@@ -376,10 +376,12 @@ class Aerodrome
         send {d down}
         sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
         send {d up}
+        ; inch tiny bit closer to hit the last few dummies in all cases
+        sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
-        ; turn camera 15° to the left to get the last group of mobs in our ccs
-        Camera.Spin(-15)
+        ; turn camera 17° to the left to get the last group of mobs in our ccs
+        Camera.Spin(-17)
 
         usedTd := false
         start := A_TickCount
@@ -394,13 +396,19 @@ class Aerodrome
             Configuration.DpsSpam()
         }
 
-        ; use superjump to exit to lobby faster
-        while (UserInterface.IsSuperJumpAvailable()) {
-            Configuration.UseSuperJumpSkill()
-            sleep 5
-        }
-
+        ; exit early even if maybe some autocasts would still kill some dummies for faster loading screens
         Sync.SetState("exit_dungeon")
+
+        ; walk tiny bit in case we can't use jump at that position
+        send {w down}
+        sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
+
+        ; use superjump to exit to lobby faster until we get out of combat
+        while (UserInterface.IsSuperJumpVisible() && !UserInterface.IsOutOfCombat()) {
+            Configuration.UseSuperJumpSkill()
+            sleep 25
+        }
 
         return Aerodrome.ExitDungeon()
     }

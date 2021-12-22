@@ -30,7 +30,7 @@ class Configuration
         if (solo) {
             return 51
         } else {
-            return 62
+            return 63
         }
     }
 
@@ -62,6 +62,7 @@ class Configuration
         config.Insert(60, 21 * 184 835)
         config.Insert(61, 21 * 194 286)
         config.Insert(62, 22 * 204 013)
+        config.Insert(63, 22 * 214 299)
 
         selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
@@ -178,7 +179,7 @@ class Configuration
         sleep 5
 
         ; stance enter and 4
-        if (!UserInterface.IsReviveVisible()) {
+        if (!UserInterface.IsReviveVisible() && UserInterface.IsSuperJumpVisible()) {
             send 4
             sleep 5
         }

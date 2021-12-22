@@ -60,6 +60,11 @@ class UserInterface
         return Utility.GetColor(860,1040) == "0x214475"
     }
 
+    IsSuperJumpVisible()
+    {
+        return Utility.GetColor(1276,888) == "0x867877"
+    }
+
     IsSuperJumpAvailable()
     {
         return Utility.GetColor(1277,888) == "0xBCB9B1"
