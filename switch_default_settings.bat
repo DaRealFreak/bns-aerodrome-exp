@@ -44,8 +44,9 @@ call :FileNameFromPath MultiToolDirectory %MultiToolFilePath%
 :: kill multi tool for gcd settings
 wmic process where name="BnS-Multi-Tool.exe" call terminate
 
-:: copy gcd settings
+:: copy gcd and client settings
 copy /b/v/y "%cd%\settings\multitool_qol_default.xml" "%USERPROFILE%\Documents\BnS\multitool_qol.xml"
+copy /b/v/y "%cd%\settings\ClientConfiguration_default.xml" "%USERPROFILE%\Documents\BnS\NCWEST\ClientConfiguration.xml"
 
 :: get installation path of BnS and check if path exists
 setlocal EnableDelayedExpansion
@@ -59,7 +60,7 @@ if not exist "%AppPath%" (
 )
 
 :: copy binloader.ini for t pose
-copy /b/v/y "%cd%\settings\binloader_farm.ini" "%AppPath%\plugins\binloader.ini"
+copy /b/v/y "%cd%\settings\binloader_default.ini" "%AppPath%\plugins\binloader.ini"
 
 if exist "%MultiToolFilePath%" if exist "%MultiToolDirectory%" (
 	pushd %MultiToolDirectory% && start %MultiToolFilePath%
