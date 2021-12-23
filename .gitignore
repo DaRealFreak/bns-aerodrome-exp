@@ -1,4 +1,5 @@
 *.log
 *.ct
 *.zip
-sync/
+settings/*
+!/**/.gitkeep
