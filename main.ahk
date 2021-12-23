@@ -374,14 +374,14 @@ class Aerodrome
         ; walk tiny bit closer to hit the last bronze dummy
         send {w down}
         send {d down}
-        sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 0.2*1000 / (Configuration.MovementSpeedhackValue())
         send {d up}
         ; inch tiny bit closer to hit the last few dummies in all cases
-        sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
-        ; turn camera 17° to the left to get the last group of mobs in our ccs
-        Camera.Spin(-17)
+        ; turn camera 10° to the left to get the last group of mobs in our ccs
+        Camera.Spin(-10)
 
         usedTd := false
         start := A_TickCount
@@ -522,6 +522,11 @@ class Aerodrome
             if (!Utility.GameActive()) {
                 log.addLogEntry("$time: couldn't find game process, exiting")
                 ExitApp
+            }
+
+            ; revive to prevent appearing in death logs
+            if (UserInterface.IsReviveVisible()) {
+                Aerodrome.Revive()
             }
 
             ; walk a tiny bit so possible confirmation windows (like cd on escape)

@@ -63,6 +63,7 @@ class Configuration
         config.Insert(61, 21 * 194 286)
         config.Insert(62, 22 * 204 013)
         config.Insert(63, 22 * 214 299)
+        config.Insert(64, 22 * 225 139)
 
         selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
