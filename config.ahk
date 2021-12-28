@@ -30,7 +30,7 @@ class Configuration
         if (solo) {
             return 51
         } else {
-            return 63
+            return 65
         }
     }
 
@@ -61,9 +61,14 @@ class Configuration
         config.Insert(59, 21 * 175 108)
         config.Insert(60, 21 * 184 835)
         config.Insert(61, 21 * 194 286)
-        config.Insert(62, 22 * 204 013)
-        config.Insert(63, 22 * 214 299)
-        config.Insert(64, 22 * 225 139)
+        config.Insert(62, 21 * 204 013)
+        config.Insert(63, 21 * 214 299)
+        config.Insert(64, 21 * 225 139)
+        config.Insert(65, 21 * 236 259)
+        config.Insert(66, 21 * 248 208)
+        config.Insert(67, 21 * 260 438)
+        config.Insert(68, 21 * 268 221)
+        config.Insert(69, 21 * 276 283)
 
         selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
@@ -93,7 +98,7 @@ class Configuration
     ; after how many runs should we repair our weapon
     UseRepairToolsAfterRunCount()
     {
-        return 5
+        return 4
     }
 
     ToggleAutoCombat()
@@ -171,7 +176,6 @@ class Configuration
 
     DpsSpam()
     {
-        ; no fucking clue
         send 2
         sleep 5
 
