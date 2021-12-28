@@ -60,6 +60,16 @@ class UserInterface
         return Utility.GetColor(860,1040) == "0x214475"
     }
 
+    HasPartyMemberInLobby()
+    {
+        return Utility.GetColor(965,120) == "0xD4B449" || Utility.GetColor(980,120) == "0xD4B449"
+    }
+
+    IsReady()
+    {
+        return Utility.GetColor(888,123) == "0x52A745" || Utility.GetColor(899,123) == "0x5FC150"
+    }
+
     IsSuperJumpVisible()
     {
         return Utility.GetColor(1276,888) == "0x867877"
