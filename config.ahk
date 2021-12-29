@@ -30,7 +30,7 @@ class Configuration
         if (solo) {
             return 51
         } else {
-            return 65
+            return 69
         }
     }
 
