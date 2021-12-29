@@ -55,11 +55,6 @@ class UserInterface
         return Utility.GetColor(984,120) == "0x38D454"
     }
 
-    IsLfpButtonVisible()
-    {
-        return Utility.GetColor(860,1040) == "0x214475"
-    }
-
     HasPartyMemberInLobby()
     {
         return Utility.GetColor(965,120) == "0xD4B449" || Utility.GetColor(980,120) == "0xD4B449"
