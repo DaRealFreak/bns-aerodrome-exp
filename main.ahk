@@ -105,6 +105,11 @@ class Aerodrome
         this.receiver := receiver
         this.solo := solo
 
+        ; clear logs evey 10 runs due to performance getting worse over time, possibly log related?
+        if (this.runCount > 0 && mod(this.runCount, 10) == 0) {
+            log.initalizeNewLogFile(1)
+        }
+
         log.addLogEntry("$time: moving to dungeon")
 
         this.runStartTimeStamp := A_TickCount
@@ -156,18 +161,18 @@ class Aerodrome
             ; receiver clears previous states to prevent desyncs
             Sync.ClearStates()
 
-            while (UserInterface.IsLfpButtonVisible()) {
+            while (!UserInterface.HasPartyMemberInLobby()) {
                 ; click somewhere so we're not in the chatbox anymore
                 UserInterface.ClickReady()
                 ; accept invites
                 send y
             }
 
-            ; click ready
-            UserInterface.ClickReady()
-            sleep 1*1000
-
-            Sync.SetState("in_lobby")
+            while (!UserInterface.IsReady()) {
+                ; click ready
+                UserInterface.ClickReady()
+                sleep 1*1000
+            }
         }
 
         Aerodrome.WaitLoadingScreen()
@@ -182,7 +187,21 @@ class Aerodrome
         send {w down}
         send {Shift}
 
+        sleep 250
+
+        start := A_TickCount
         while (!UserInterface.IsInLoadingScreen()) {
+            if (mod(Round(A_TickCount / 1000), 5) == 0) {
+                Random, rand, 1, 10
+                if (rand >= 9) {
+                    send {Space down}
+                    sleep 200
+                    send {Space up}
+                }
+                ; sleep 0.5 seconds so we don't run into the modulo check again in this cycle
+                sleep 500
+            }
+
             sleep 25
         }
 
@@ -333,7 +352,7 @@ class Aerodrome
         }
 
         send {s down}
-        sleep 2*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 2.5*1000 / (Configuration.MovementSpeedhackValue())
         send {s up}
 
         while (!UserInterface.IsSsAvailable()) {
@@ -348,12 +367,12 @@ class Aerodrome
         }
 
         start := A_TickCount
-        while (A_TickCount < start + 1.25*1000) {
+        while (A_TickCount < start + 1.5*1000) {
             Configuration.DefaultSpam()
         }
 
         send {d down}
-        sleep 1.7*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 1.4*1000 / (Configuration.MovementSpeedhackValue())
         send {d up}
 
         while (UserInterface.IsSsAvailable()) {
@@ -365,23 +384,22 @@ class Aerodrome
         Camera.Spin(-10)
 
         start := A_TickCount
-        while (start + 1.3*1000 >= A_TickCount) {
+        while (start + 1.1*1000 >= A_TickCount) {
             ; trigger iframe while we wait
             send z
             sleep 25
+            Configuration.DefaultSpam()
         }
 
         ; walk tiny bit closer to hit the last bronze dummy
         send {w down}
         send {d down}
-        sleep 0.2*1000 / (Configuration.MovementSpeedhackValue())
-        send {d up}
-        ; inch tiny bit closer to hit the last few dummies in all cases
-        sleep 0.3*1000 / (Configuration.MovementSpeedhackValue())
+        sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
+        send {d up}
 
-        ; turn camera 10° to the left to get the last group of mobs in our ccs
-        Camera.Spin(-10)
+        ; turn camera 15° to the left to get the last group of mobs in our ccs
+        Camera.Spin(-15)
 
         usedTd := false
         start := A_TickCount
