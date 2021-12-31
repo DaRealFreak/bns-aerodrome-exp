@@ -193,13 +193,13 @@ class Aerodrome
         while (!UserInterface.IsInLoadingScreen()) {
             if (mod(Round(A_TickCount / 1000), 5) == 0) {
                 Random, rand, 1, 10
-                if (rand >= 9) {
+                if (rand >= 5) {
                     send {Space down}
                     sleep 200
                     send {Space up}
                 }
                 ; sleep 0.5 seconds so we don't run into the modulo check again in this cycle
-                sleep 500
+                sleep 1000
             }
 
             sleep 25
@@ -367,39 +367,50 @@ class Aerodrome
         }
 
         start := A_TickCount
-        while (A_TickCount < start + 1.5*1000) {
+        while (A_TickCount < start + 0.8*1000) {
             Configuration.DefaultSpam()
         }
-
-        send {d down}
-        sleep 1.4*1000 / (Configuration.MovementSpeedhackValue())
-        send {d up}
 
         while (UserInterface.IsSsAvailable()) {
             send ss
             sleep 5
         }
 
-        ; turn camera 10 to the left since we walked a bit to the right
-        Camera.Spin(-10)
+        ; wait for ss animation
+        sleep 250
+
+        ; get unstuck
+        send {w down}
+        sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
+        send {w up}
+
+        ; walk right
+        send {d down}
+        sleep 1*1000 / (Configuration.MovementSpeedhackValue())
+        send {d up}
+
+        send {s down}
+        sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
+        send {s up}
+
+        send {d down}
+        sleep 0.35*1000 / (Configuration.MovementSpeedhackValue())
+        send {d up}
+
+        ; turn camera 26° to the left since we walked a bit to the right
+        Camera.Spin(-26)
 
         start := A_TickCount
-        while (start + 1.1*1000 >= A_TickCount) {
+        while (start + 0.8*1000 >= A_TickCount) {
             ; trigger iframe while we wait
             send z
             sleep 25
             Configuration.DefaultSpam()
         }
 
-        ; walk tiny bit closer to hit the last bronze dummy
-        send {w down}
-        send {d down}
-        sleep 0.4*1000 / (Configuration.MovementSpeedhackValue())
-        send {w up}
-        send {d up}
-
-        ; turn camera 15° to the left to get the last group of mobs in our ccs
-        Camera.Spin(-15)
+        send {s down}
+        sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
+        send {s up}
 
         usedTd := false
         start := A_TickCount
