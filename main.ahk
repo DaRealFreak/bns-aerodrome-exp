@@ -377,7 +377,7 @@ class Aerodrome
         }
 
         ; wait for ss animation
-        sleep 250
+        sleep 300
 
         ; get unstuck
         send {w down}
@@ -397,8 +397,8 @@ class Aerodrome
         sleep 0.35*1000 / (Configuration.MovementSpeedhackValue())
         send {d up}
 
-        ; turn camera 26° to the left since we walked a bit to the right
-        Camera.Spin(-26)
+        ; turn camera 27° to the left since we walked a bit to the right
+        Camera.Spin(-27)
 
         start := A_TickCount
         while (start + 0.8*1000 >= A_TickCount) {
