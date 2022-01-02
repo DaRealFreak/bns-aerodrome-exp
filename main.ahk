@@ -284,7 +284,7 @@ class Aerodrome
             send {w up}
             sleep 250
 
-            while (UserInterface.IsSuperJumpAvailable()) {
+            while (UserInterface.IsSuperJumpAvailable() || Sync.HasState("exit_dungeon")) {
                 Configuration.UseSuperJumpSkill()
                 sleep 5
             }
@@ -434,7 +434,7 @@ class Aerodrome
         send {w up}
 
         ; use superjump to exit to lobby faster until we get out of combat
-        while (UserInterface.IsSuperJumpVisible() && !UserInterface.IsOutOfCombat()) {
+        while (!UserInterface.IsReviveVisible() && !UserInterface.IsOutOfCombat()) {
             Configuration.UseSuperJumpSkill()
             sleep 25
         }
