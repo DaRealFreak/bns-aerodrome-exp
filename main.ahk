@@ -119,7 +119,7 @@ class Aerodrome
             if (!this.solo) {
                 if (!Configuration.IsWarlockTest()) {
                     lastInvite := 0
-                    while (!UserInterface.IsDuoReady()) {
+                    while (!UserInterface.IsDuoReady() && Utility.GameActive()) {
                         if (lastInvite + 3*1000 <= A_TickCount) {
                             UserInterface.ClickChat()
                             Configuration.InviteDuo()
@@ -284,7 +284,7 @@ class Aerodrome
             send {w up}
             sleep 250
 
-            while (UserInterface.IsSuperJumpAvailable() || Sync.HasState("exit_dungeon")) {
+            while (UserInterface.IsSuperJumpAvailable() && !Sync.HasState("exit_dungeon") && Utility.GameActive()) {
                 Configuration.UseSuperJumpSkill()
                 sleep 5
             }
@@ -434,7 +434,7 @@ class Aerodrome
         send {w up}
 
         ; use superjump to exit to lobby faster until we get out of combat
-        while (!UserInterface.IsReviveVisible() && !UserInterface.IsOutOfCombat()) {
+        while (!UserInterface.IsReviveVisible() && !UserInterface.IsOutOfCombat() && Utility.GameActive()) {
             Configuration.UseSuperJumpSkill()
             sleep 25
         }
@@ -616,8 +616,8 @@ class Aerodrome
         expectedExpPerHour := (Configuration.ExpectedExpPerRun(this.solo)) * expectedSuccessfulRunsPerHour
         accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun(this.solo)
 
-        if (!this.solo) {
-            ; if we're running in solo exp is reduced to 60%
+        if (!this.solo && !Configuration.IsWarlockTest()) {
+            ; if we're running in duo exp is reduced to 60% of the original
             expectedExpPerHour := expectedExpPerHour * 0.6
             accumulatedExp := accumulatedExp * 0.6
         }
