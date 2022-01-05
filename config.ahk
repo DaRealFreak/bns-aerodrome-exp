@@ -9,7 +9,7 @@ class Configuration
 {
     IsWarlockTest()
     {
-        return false
+        return true
     }
 
     ; shut down the computer if no bns processes are found anymore (dc or maintenance)
@@ -30,7 +30,7 @@ class Configuration
         if (solo) {
             return 51
         } else {
-            return 69
+            return 71
         }
     }
 
@@ -69,6 +69,9 @@ class Configuration
         config.Insert(67, 21 * 260 438)
         config.Insert(68, 21 * 268 221)
         config.Insert(69, 21 * 276 283)
+        ; not fully correct exp values due to clan exp bonus only being 95% rn, so calculated up
+        config.Insert(70, 21 * 287 399)
+        config.Insert(71, 21 * 298 798)
 
         selectedStage := Configuration.AerodromeStage(solo)
         if (config[selectedStage] > 0) {
