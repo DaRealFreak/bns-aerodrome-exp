@@ -6,6 +6,7 @@ SetWinDelay, -1
 
 #Include %A_ScriptDir%\camera.ahk
 #Include %A_ScriptDir%\config.ahk
+#Include %A_ScriptDir%\game.ahk
 #Include %A_ScriptDir%\ui.ahk
 #Include %A_ScriptDir%\sync.ahk
 #Include %A_ScriptDir%\hotkeys.ahk
@@ -100,11 +101,8 @@ class Aerodrome
         }
     }
 
-    EnterLobby(receiver, solo = false)
+    EnterLobby()
     {
-        this.receiver := receiver
-        this.solo := solo
-
         ; clear logs evey 10 runs due to performance getting worse over time, possibly log related?
         if (this.runCount > 0 && mod(this.runCount, 10) == 0) {
             log.initalizeNewLogFile(1)
@@ -115,69 +113,123 @@ class Aerodrome
         this.runStartTimeStamp := A_TickCount
         this.diedInRun := false
 
-        if (!this.receiver || this.solo) {
-            if (!this.solo) {
-                if (!Configuration.IsWarlockTest()) {
-                    lastInvite := 0
-                    while (!UserInterface.IsDuoReady() && Utility.GameActive()) {
-                        if (lastInvite + 3*1000 <= A_TickCount) {
-                            UserInterface.ClickChat()
-                            Configuration.InviteDuo()
-                            send {Enter}
-                            lastInvite := A_TickCount
+        inGroup := false
+
+        while (true) {
+            Game.SwitchToWindow(Game.GetStartingWindowHwid())
+
+            if (UserInterface.IsDuoReady()) {
+                break
+            }
+
+            ; main invites leecher
+            loop, 3 {
+                UserInterface.ClickChat()
+                sleep 150
+            }
+
+            Configuration.InviteDuo()
+            send {Enter}
+
+            ; every leecher accepts
+            for index, hwnd in Game.GetOtherWindowHwids()
+            {
+                Game.SwitchToWindow(hwnd)
+                
+                ; while we don't have a party member just normally loop
+                if (!UserInterface.HasPartyMemberInLobby()) {
+                    loop, 5 {
+                        UserInterface.ClickReady()
+                        send y
+                        sleep 100
+                    }
+
+                    if (UserInterface.HasPartyMemberInLobby()) {
+                        ; else ready up
+                        while (!UserInterface.IsReady()) {
+                            ; click ready
+                            UserInterface.ClickReady()
+                            sleep 1*1000
                         }
-                        sleep 25
                     }
-
-                }
-            }
-
-            Aerodrome.EnableSpeedHack()
-
-            while (!UserInterface.IsInLoadingScreen()) {
-                ; sometimes stage selection is out of focus, so we try to set it twice
-                stage := Configuration.AerodromeStage(this.solo)
-                loop, 2 {
-                    UserInterface.EditStage()
-                    sleep 250
-                    send %stage%
-                    sleep 250
-                }
-
-                UserInterface.ClickEnterDungeon()
-                start := A_TickCount
-
-                ; repeat loop every 3 seconds but break as soon as we see the loading screen
-                while (start + 3*1000 >= A_TickCount) {
-                    if (UserInterface.IsInLoadingScreen()) {
-                        break
+                } else {
+                    ; safety activation if we skipped the initial one
+                    while (!UserInterface.IsReady()) {
+                        ; click ready
+                        UserInterface.ClickReady()
+                        sleep 1*1000
                     }
-                    sleep 25
                 }
             }
 
-            Aerodrome.DisableSpeedHack()
-        } else {
-            ; receiver clears previous states to prevent desyncs
-            Sync.ClearStates()
+            Game.SwitchToWindow(Game.GetStartingWindowHwid())
 
-            while (!UserInterface.HasPartyMemberInLobby()) {
-                ; click somewhere so we're not in the chatbox anymore
-                UserInterface.ClickReady()
-                ; accept invites
-                send y
-            }
-
-            while (!UserInterface.IsReady()) {
-                ; click ready
-                UserInterface.ClickReady()
-                sleep 1*1000
+            ; break if duo is ready or sleep 3 seconds before next invite cycle
+            lastInvite := 0
+            while (!UserInterface.IsDuoReady()) {
+                if (lastInvite + 3*1000 <= A_TickCount) {
+                    break
+                }
+                sleep 25
             }
         }
 
-        Aerodrome.WaitLoadingScreen()
+        Aerodrome.EnableSpeedHack()
 
-        return Aerodrome.EnterDungeon()
+        while (!UserInterface.IsInLoadingScreen()) {
+            ; sometimes stage selection is out of focus, so we try to set it twice
+            stage := Configuration.AerodromeStage()
+            loop, 2 {
+                UserInterface.EditStage()
+                sleep 250
+                send %stage%
+                sleep 250
+            }
+
+            UserInterface.ClickEnterDungeon()
+            start := A_TickCount
+
+            ; repeat loop every 3 seconds but break as soon as we see the loading screen
+            while (start + 3*1000 >= A_TickCount) {
+                if (UserInterface.IsInLoadingScreen()) {
+                    break
+                }
+                sleep 25
+            }
+        }
+
+        Aerodrome.DisableSpeedHack()
+
+        ; move into the dungeon
+        ; every leecher runs in first
+        for index, hwnd in Game.GetOtherWindowHwids()
+        {
+            Game.SwitchToWindow(hwnd)
+            Aerodrome.WaitLoadingScreen()
+            Aerodrome.EnterDungeon()
+        }
+
+        ; now run in with main account
+        Game.SwitchToWindow(Game.GetStartingWindowHwid())
+        Aerodrome.WaitLoadingScreen()
+        Aerodrome.EnterDungeon()
+
+
+        ; move to dummies
+        ; every leecher runs in first
+        for index, hwnd in Game.GetOtherWindowHwids()
+        {
+            Game.SwitchToWindow(hwnd)
+            Aerodrome.WaitLoadingScreen()
+            Aerodrome.MoveToDummies(true)
+        }
+
+        ; now run in with main account
+        Game.SwitchToWindow(Game.GetStartingWindowHwid())
+        Aerodrome.WaitLoadingScreen()
+        Aerodrome.MoveToDummies(false)
+
+        return Aerodrome.PullDummies()
     }
 
     EnterDungeon()
@@ -204,15 +256,11 @@ class Aerodrome
 
             sleep 25
         }
-
-        Aerodrome.WaitLoadingScreen()
-
-        return Aerodrome.MoveToDummies()
     }
 
-    MoveToDummies()
+    MoveToDummies(leecher := false)
     {
-        if (!this.receiver || this.solo) {
+        if (!leecher) {
             Aerodrome.CheckRepair()
         }
 
@@ -220,13 +268,9 @@ class Aerodrome
 
         Aerodrome.CheckBuffFood()
 
-        if (!this.receiver || this.solo) {
+        if (!leecher) {
             sleep 0.5*1000
             Aerodrome.CheckHealth()
-        }
-
-        if (this.receiver && !this.solo) {
-            Sync.WaitForState("dummyroom")
         }
 
         log.addLogEntry("$time: moving to the dummy room")
@@ -252,60 +296,34 @@ class Aerodrome
         send {Shift}
         ; sleep 3.5 seconds for solo action or 4.5 seconds for wl carry run
         sleep 3.5*1000 / (Configuration.MovementSpeedhackValue())
-        if (!this.solo) {
-            sleep 1*1000 / (Configuration.MovementSpeedhackValue())
-        }
+        sleep 1*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
         sleep 50
 
-        if (this.solo) {
-            ; walk into the corner
-            send {w down}
-            send {a down}
-            send {Shift}
-            sleep 4*1000 / Configuration.MovementSpeedhackValue()
-            send {a up}
-            send {w up}
-            sleep 50
-
-            return Aerodrome.StartAutoCombat()
-        }
-
-        if (!this.receiver) {
-            ; slave reached dummy room, tell receiver to start moving to dummy room
-            Sync.SetState("dummyroom")
-        }
-
-        if (this.receiver) {
+        if (leecher) {
             ; continue running for a while to get rid of mobs
             send {w down}
             send {Shift}
-            sleep 7*1000 / (Configuration.MovementSpeedhackValue())
+            sleep 5*1000 / (Configuration.MovementSpeedhackValue())
             send {w up}
             sleep 250
 
-            while (UserInterface.IsSuperJumpAvailable() && !Sync.HasState("exit_dungeon") && Utility.GameActive()) {
+            while (UserInterface.IsSuperJumpAvailable() && Utility.GameActive()) {
                 Configuration.UseSuperJumpSkill()
                 sleep 5
             }
 
-            Sync.WaitForState("exit_dungeon", 90*1000)
-
-            return Aerodrome.ExitDungeon()
+            return
         }
 
-        return Aerodrome.PullDummies()
+        return
     }
 
     PullDummies()
     {
-        Sync.SetState("dummyroom")
-
         ; get into combat for reliable pulling of mobs
         while (!UserInterface.IsBlockOnCooldown()) {
             if (UserInterface.IsReviveVisible()) {
-                Sync.SetState("exit_dungeon")
-
                 return Aerodrome.ExitDungeon()
             }
 
@@ -358,8 +376,6 @@ class Aerodrome
         while (!UserInterface.IsSsAvailable()) {
             if (UserInterface.IsReviveVisible()) {
                 this.diedInRun := true
-                Sync.SetState("exit_dungeon")
-
                 return Aerodrome.ExitDungeon()
             }
 
@@ -425,16 +441,13 @@ class Aerodrome
             Configuration.DpsSpam()
         }
 
-        ; exit early even if maybe some autocasts would still kill some dummies for faster loading screens
-        Sync.SetState("exit_dungeon")
-
         ; walk tiny bit in case we can't use jump at that position
         send {w down}
         sleep 0.1*1000 / (Configuration.MovementSpeedhackValue())
         send {w up}
 
         ; use superjump to exit to lobby faster until we get out of combat
-        while (!UserInterface.IsReviveVisible() && !UserInterface.IsOutOfCombat() && Utility.GameActive()) {
+        while (UserInterface.IsSuperJumpAvailable() && !UserInterface.IsOutOfCombat() && Utility.GameActive()) {
             Configuration.UseSuperJumpSkill()
             sleep 25
         }
@@ -545,6 +558,34 @@ class Aerodrome
 
     ExitDungeon()
     {
+        ; every leecher runs in first
+        for index, hwnd in Game.GetOtherWindowHwids()
+        {
+            Game.SwitchToWindow(hwnd)
+            Aerodrome.ExitDungeonSingleClient()
+        }
+
+        ; now run in with main account
+        Game.SwitchToWindow(Game.GetStartingWindowHwid())
+        Aerodrome.ExitDungeonSingleClient()
+
+        if (!this.diedInRun) {
+            log.addLogEntry("$time: run took " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
+            this.successfulRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
+        } else {
+            log.addLogEntry("$time: failed run after " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
+            this.failedRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
+        }
+
+        this.runCount += 1
+
+        Aerodrome.LogStatistics()
+
+        return true
+    }
+
+    ExitDungeonSingleClient()
+    {
         log.addLogEntry("$time: exiting dungeon")
 
         while (!UserInterface.IsInF8Lobby()) {
@@ -569,20 +610,6 @@ class Aerodrome
             sleep 1*1000
             send y
         }
-
-        if (!this.diedInRun) {
-            log.addLogEntry("$time: run took " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
-            this.successfulRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
-        } else {
-            log.addLogEntry("$time: failed run after " Utility.RoundDecimal(((A_TickCount - this.runStartTimeStamp) / 1000)) " seconds")
-            this.failedRuns.Push(((A_TickCount - this.runStartTimeStamp) / 1000))
-        }
-
-        this.runCount += 1
-
-        Aerodrome.LogStatistics()
-
-        return true
     }
 
     LogStatistics()
@@ -613,10 +640,10 @@ class Aerodrome
 
         averageRunsHour := 3600 / (averageRunTime * successRate + averageFailRunTime * failedRate)
         expectedSuccessfulRunsPerHour := averageRunsHour * successRate
-        expectedExpPerHour := (Configuration.ExpectedExpPerRun(this.solo)) * expectedSuccessfulRunsPerHour
-        accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun(this.solo)
+        expectedExpPerHour := (Configuration.ExpectedExpPerRun()) * expectedSuccessfulRunsPerHour
+        accumulatedExp := this.successfulRuns.Length() * Configuration.ExpectedExpPerRun()
 
-        if (!this.solo && !Configuration.IsWarlockTest()) {
+        if (!Configuration.IsWarlockTest()) {
             ; if we're running in duo exp is reduced to 60% of the original
             expectedExpPerHour := expectedExpPerHour * 0.6
             accumulatedExp := accumulatedExp * 0.6

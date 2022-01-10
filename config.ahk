@@ -13,17 +13,9 @@ class Configuration
     }
 
     ; which stage to farm
-    AerodromeStage(solo)
+    AerodromeStage()
     {
-        if (Configuration.IsWarlockTest()) {
-            return 70
-        }
-
-        if (solo) {
-            return 51
-        } else {
-            return 65
-        }
+        return 65
     }
 
     InviteDuo()
@@ -55,7 +47,7 @@ class Configuration
     }
 
     ; depending on the exp boni you have
-    ExpectedExpPerRun(solo)
+    ExpectedExpPerRun()
     {
         ; 21 dummies * x exp, big dummy gives 0 exp
         config := {}
@@ -82,7 +74,7 @@ class Configuration
         config.Insert(70, 21 * 287 399)
         config.Insert(71, 21 * 298 798)
 
-        selectedStage := Configuration.AerodromeStage(solo)
+        selectedStage := Configuration.AerodromeStage()
         if (config[selectedStage] > 0) {
             return config[selectedStage]
         } else {

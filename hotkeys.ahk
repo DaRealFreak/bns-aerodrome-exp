@@ -21,49 +21,14 @@ RemoveToolTip:
 
 #IfWinActive ahk_class UnrealWindow
 Numpad0::
-    global log := new LogClass("aerodrome")
+    global log := new LogClass("aerodrome_multibox")
     log.initalizeNewLogFile(1)
     log.addLogEntry("$time: starting aerodrome exp farm")
 
-    ; clear leftover states before starting
-    Sync.ClearStates()
+    Game.SetStartingWindowHwid()
 
     loop {
-        if (!Aerodrome.EnterLobby(false)) {
-            break
-        }
-        sleep 250
-    }
-
-    return
-
-Numpad1::
-    global log := new LogClass("aerodrome_leech")
-    log.initalizeNewLogFile(1)
-    log.addLogEntry("$time: starting aerodrome exp farm")
-
-    ; clear leftover states before starting
-    Sync.ClearStates()
-
-    loop {
-        if (!Aerodrome.EnterLobby(true)) {
-            break
-        }
-        sleep 250
-    }
-
-    return
-
-Numpad2::
-    global log := new LogClass("aerodrome_solo")
-    log.initalizeNewLogFile(1)
-    log.addLogEntry("$time: starting aerodrome exp farm")
-
-    ; clear leftover states before starting
-    Sync.ClearStates()
-
-    loop {
-        if (!Aerodrome.EnterLobby(true, true)) {
+        if (!Aerodrome.EnterLobby()) {
             break
         }
         sleep 250
