@@ -9,7 +9,26 @@ class Configuration
 {
     IsWarlockTest()
     {
-        return true
+        return false
+    }
+
+    ; which stage to farm
+    AerodromeStage(solo)
+    {
+        if (Configuration.IsWarlockTest()) {
+            return 70
+        }
+
+        if (solo) {
+            return 51
+        } else {
+            return 65
+        }
+    }
+
+    InviteDuo()
+    {
+        send /invite "StoneRRF BM"
     }
 
     ; shut down the computer if no bns processes are found anymore (dc or maintenance)
@@ -22,16 +41,6 @@ class Configuration
     ShouldUseBuffFood()
     {
         return true
-    }
-
-    ; which stage to farm
-    AerodromeStage(solo)
-    {
-        if (solo) {
-            return 51
-        } else {
-            return 71
-        }
     }
 
     ; whatever we want to do if health is critical (f.e. hmb/drinking potions)
@@ -203,10 +212,5 @@ class Configuration
         ; talisman
         send z
         sleep 5
-    }
-
-    InviteDuo()
-    {
-        send /invite "Lunar Tempest"
     }
 }

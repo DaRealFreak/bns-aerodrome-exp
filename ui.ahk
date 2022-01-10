@@ -82,7 +82,8 @@ class UserInterface
 
     IsSsAvailable()
     {
-        return Utility.GetColor(695,951) == "0xD8A4B3"
+        col := Utility.GetColor(695,951)
+        return col == "0xD8A5B3" || col == "0xD8A4B3"
     }
 
     IsHpBelowCritical()
@@ -116,13 +117,14 @@ class UserInterface
     ; any pixel on the revive skil
     IsReviveVisible()
     {
-        return Utility.GetColor(1038,899) == "0x6F542B"
+        col := Utility.GetColor(1038,899)
+        return col == "0x6F552B" || col == "0x6F542B"
     }
 
     ; sprint bar to check if we're out of combat
     IsOutOfCombat()
     {
-		col := Utility.GetColor(809,836)
+        col := Utility.GetColor(809,836)
         return col == "0xA6B721" || col == "0xA5B721"
     }
 }
